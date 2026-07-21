@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: drapeai-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - drapeai-network
+
+  backend:
+    build:
+      context: ./drapeai-backend
+      dockerfile: Dockerfile
+    container_name: drapeai-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/drapeai
+    depends_on:
+      - mongodb
+    networks:
+      - drapeai-network
+
+  frontend:
+    build:
+      context: ./drapeai-frontend
+      dockerfile: Dockerfile
+    container_name: drapeai-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - drapeai-network
+
+volumes:
+  mongo-data:
+
+networks:
+  drapeai-network:
+    driver: bridge
