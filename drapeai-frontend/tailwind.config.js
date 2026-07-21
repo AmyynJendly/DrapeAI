@@ -7,15 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          900: '#14532d',
-        }
-      }
+        surface: '#F0EEED',
+        hero: '#F2F0F1',
+        star: '#FFC700',
+        discount: '#FF3333',
+      },
+      fontFamily: {
+        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+      },
     },
   },
   plugins: [],
