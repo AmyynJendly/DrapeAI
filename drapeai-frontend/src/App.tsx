@@ -9,6 +9,14 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
+  const getOptimizedImageUrl = (url: string) => {
+    if (!url) return '';
+    if (url.includes('images.unsplash.com') && !url.includes('?')) {
+      return `${url}?auto=format&fit=crop&w=600&q=80`;
+    }
+    return url;
+  };
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -139,10 +147,11 @@ export default function App() {
               >
                 <div className="relative aspect-square overflow-hidden bg-slate-950">
                   <img
-                    src={product.imageUrl}
+                    src={getOptimizedImageUrl(product.imageUrl)}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute top-3 left-3">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide uppercase ${
