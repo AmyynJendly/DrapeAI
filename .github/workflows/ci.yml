@@ -41,7 +41,9 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./drapeai-frontend
-        run: npm install
+        run: |
+          npm install
+          chmod -R +x node_modules/.bin || true
 
       - name: Build Frontend Assets
         working-directory: ./drapeai-frontend
