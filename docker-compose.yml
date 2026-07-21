@@ -10,6 +10,7 @@ services:
       - drapeai-network
 
   backend:
+    image: ${DOCKERHUB_USERNAME:-drapeai}/drapeai-backend:latest
     build:
       context: ./drapeai-backend
       dockerfile: Dockerfile
@@ -24,6 +25,7 @@ services:
       - drapeai-network
 
   frontend:
+    image: ${DOCKERHUB_USERNAME:-drapeai}/drapeai-frontend:latest
     build:
       context: ./drapeai-frontend
       dockerfile: Dockerfile
