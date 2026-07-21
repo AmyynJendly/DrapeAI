@@ -2,10 +2,11 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm config set fetch-retry-maxtimeout 120000 && \
+RUN npm config set strict-ssl false && \
+    npm config set fetch-retry-maxtimeout 600000 && \
     npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retries 5 && \
-    (npm ci || npm install --no-audit)
+    npm config set fetch-retries 10 && \
+    npm install --no-audit
 COPY . .
 RUN npm run build
 
