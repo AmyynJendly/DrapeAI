@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Product } from './types';
 import { productApi } from './services/api';
 import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 import TopBanner from './components/TopBanner';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import BrandBar from './components/BrandBar';
 import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
+import CartDrawer from './components/CartDrawer';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrdersPage from './pages/OrdersPage';
 import TryOnModal from './components/TryOnModal';
 
 // Seeded fallback products matching Phase 1 spec in case backend is loading or offline
@@ -127,7 +131,7 @@ function HomePage() {
       <TopBanner />
 
       {/* Navigation Bar */}
-      <Navbar cartCount={2} />
+      <Navbar />
 
       {/* Hero Section */}
       <HeroSection />
@@ -235,13 +239,18 @@ function HomePage() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-        </Routes>
-      </BrowserRouter>
+      <CartProvider>
+        <BrowserRouter>
+          <CartDrawer />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+          </Routes>
+        </BrowserRouter>
+      </CartProvider>
     </AuthProvider>
   );
 }

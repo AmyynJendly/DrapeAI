@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ShoppingBag, Sparkles, LogOut } from 'lucide-react';
+import { Search, ShoppingBag, Sparkles, LogOut, Package } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
-interface NavbarProps {
-  cartCount?: number;
-}
-
-export default function Navbar({ cartCount = 0 }: NavbarProps) {
+export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { cartCount, setIsCartOpen } = useCart();
   const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <nav className="bg-white border-b border-gray-100 py-4 px-4 sm:px-8 sticky top-0 z-50 backdrop-blur-md bg-white/90">
+    <nav className="bg-white border-b border-gray-100 py-4 px-4 sm:px-8 sticky top-0 z-40 backdrop-blur-md bg-white/90">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <div className="flex items-center gap-8">
@@ -23,7 +21,7 @@ export default function Navbar({ cartCount = 0 }: NavbarProps) {
             </span>
           </Link>
 
-          {/* Desktop Navigation Links with Center Underline Animation */}
+          {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
             <a href="#catalog" className="nav-link-hover text-black text-sm font-bold tracking-wide uppercase transition">
               Shop
@@ -34,13 +32,13 @@ export default function Navbar({ cartCount = 0 }: NavbarProps) {
             <a href="#catalog" className="nav-link-hover text-black text-sm font-bold tracking-wide uppercase transition">
               New Arrivals
             </a>
-            <a href="#brands" className="nav-link-hover text-black text-sm font-bold tracking-wide uppercase transition">
-              Brands
-            </a>
+            <Link to="/orders" className="nav-link-hover text-black text-sm font-bold tracking-wide uppercase transition">
+              My Orders
+            </Link>
           </div>
         </div>
 
-        {/* Search Bar with Focus Glow */}
+        {/* Search Bar */}
         <div className="hidden sm:flex flex-1 max-w-md items-center bg-[#F0EEED] rounded-full px-4 py-2.5 text-sm text-black border border-transparent focus-within:border-black focus-within:bg-white transition-all shadow-inner">
           <Search className="w-4 h-4 text-black/40 mr-2 flex-shrink-0" />
           <input
@@ -56,7 +54,12 @@ export default function Navbar({ cartCount = 0 }: NavbarProps) {
             <Search className="w-5 h-5" />
           </button>
 
-          <button className="relative text-black hover:text-black/60 p-2 active:scale-90 transition-transform">
+          {/* Cart Drawer Trigger */}
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="relative text-black hover:text-black/60 p-2 active:scale-90 transition-transform cursor-pointer"
+            title="View Cart"
+          >
             <ShoppingBag className="w-5 h-5" />
             {cartCount > 0 && (
               <span className="absolute top-0 right-0 bg-black text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
@@ -69,7 +72,7 @@ export default function Navbar({ cartCount = 0 }: NavbarProps) {
             <div className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0EEED] hover:bg-black hover:text-white transition-all text-xs font-bold text-black shadow-sm active:scale-95"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0EEED] hover:bg-black hover:text-white transition-all text-xs font-bold text-black shadow-sm active:scale-95 cursor-pointer"
               >
                 <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[11px] font-black">
                   {user?.name?.charAt(0).toUpperCase() || 'U'}
@@ -83,6 +86,16 @@ export default function Navbar({ cartCount = 0 }: NavbarProps) {
                     <p className="text-xs font-bold text-black truncate">{user?.name}</p>
                     <p className="text-[11px] text-black/60 truncate">{user?.email}</p>
                   </div>
+
+                  <Link
+                    to="/orders"
+                    onClick={() => setShowMenu(false)}
+                    className="w-full text-left px-4 py-2.5 text-xs font-bold text-black hover:bg-[#F0EEED] flex items-center gap-2 transition"
+                  >
+                    <Package className="w-3.5 h-3.5" />
+                    My Orders
+                  </Link>
+
                   <button
                     onClick={() => {
                       logout();

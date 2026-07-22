@@ -1,6 +1,7 @@
 import React from 'react';
-import { Star, Sparkles } from 'lucide-react';
+import { Star, Sparkles, ShoppingBag } from 'lucide-react';
 import { Product } from '../types';
+import { useCart } from '../context/CartContext';
 
 interface ProductCardProps {
   product: Product;
@@ -8,6 +9,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onTryOn }: ProductCardProps) {
+  const { addToCart } = useCart();
   const ratingScore = 4.5;
   const originalPrice = Math.round(product.price * 1.25);
   const discountPercent = -20;
@@ -37,6 +39,15 @@ export default function ProductCard({ product, onTryOn }: ProductCardProps) {
             {product.category}
           </span>
         </div>
+
+        {/* Quick Add to Cart Floating Button */}
+        <button
+          onClick={() => addToCart(product, 1)}
+          className="absolute bottom-3 right-3 bg-white text-black p-2.5 rounded-full shadow-lg hover:bg-black hover:text-white transition-all duration-200 active:scale-90"
+          title="Add to Cart"
+        >
+          <ShoppingBag className="w-4 h-4" />
+        </button>
       </div>
 
       {/* 2. Product Details */}
@@ -71,14 +82,24 @@ export default function ProductCard({ product, onTryOn }: ProductCardProps) {
           </span>
         </div>
 
-        {/* 3. Action Button ("Try On with AI ✨") */}
-        <button
-          onClick={() => onTryOn?.(product)}
-          className="shimmer-btn w-full bg-black text-white text-xs py-3 rounded-full font-bold hover:bg-black/90 flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 mt-2 cursor-pointer"
-        >
-          <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-          Try On with AI ✨
-        </button>
+        {/* 3. Action Buttons */}
+        <div className="grid grid-cols-5 gap-2 pt-1">
+          <button
+            onClick={() => onTryOn?.(product)}
+            className="col-span-4 shimmer-btn bg-black text-white text-xs py-3 rounded-full font-bold hover:bg-black/90 flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-yellow-400 animate-pulse" />
+            Try On with AI ✨
+          </button>
+
+          <button
+            onClick={() => addToCart(product, 1)}
+            className="col-span-1 bg-white hover:bg-black text-black hover:text-white border border-black/10 rounded-full flex items-center justify-center transition-all shadow-sm active:scale-90"
+            title="Add to Cart"
+          >
+            <ShoppingBag className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
