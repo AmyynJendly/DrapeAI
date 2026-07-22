@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, RefreshCw, Sparkles, Filter } from 'lucide-react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Loader2, Sparkles } from 'lucide-react';
 import { Product } from './types';
 import { productApi } from './services/api';
+import { AuthProvider } from './context/AuthContext';
 import TopBanner from './components/TopBanner';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import BrandBar from './components/BrandBar';
 import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 // Seeded fallback products matching Phase 1 spec in case backend is loading or offline
 const MOCK_PRODUCTS: Product[] = [
@@ -77,7 +81,7 @@ const MOCK_PRODUCTS: Product[] = [
   },
 ];
 
-export default function App() {
+function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -113,24 +117,23 @@ export default function App() {
 
   const handleTryOn = (product: Product) => {
     setSelectedTryOnProduct(product);
-    // Modal will be expanded in Phase 2+
   };
 
   return (
     <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white flex flex-col">
-      {/* 1. Top Announcement Banner */}
+      {/* Top Announcement Banner */}
       <TopBanner />
 
-      {/* 2. Navigation Bar */}
+      {/* Navigation Bar */}
       <Navbar cartCount={2} />
 
-      {/* 3. Hero Section */}
+      {/* Hero Section */}
       <HeroSection />
 
-      {/* 4. Brand Logo Bar */}
+      {/* Brand Logo Bar */}
       <BrandBar />
 
-      {/* 5. Main Catalog Section */}
+      {/* Main Catalog Section */}
       <main id="catalog" className="max-w-7xl mx-auto px-4 sm:px-8 py-16 flex-1 w-full">
         {/* Section Header */}
         <div className="text-center space-y-4 mb-12">
@@ -208,7 +211,7 @@ export default function App() {
         </div>
       </main>
 
-      {/* 6. Try-On Modal Notice (Phase 1 Preview) */}
+      {/* Try-On Modal Notice */}
       {selectedTryOnProduct && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-[24px] max-w-md w-full p-8 shadow-2xl space-y-6 text-center border border-black/10">
@@ -219,7 +222,7 @@ export default function App() {
               Virtual Try-On: {selectedTryOnProduct.name}
             </h3>
             <p className="text-sm text-black/60">
-              AI Try-On model processing will trigger in Phase 2. You will be able to upload your photo to preview <span className="font-bold text-black">{selectedTryOnProduct.name}</span> instantly.
+              Select your photo to preview <span className="font-bold text-black">{selectedTryOnProduct.name}</span> with AI.
             </p>
             <button
               onClick={() => setSelectedTryOnProduct(null)}
@@ -231,8 +234,22 @@ export default function App() {
         </div>
       )}
 
-      {/* 7. Footer Component */}
+      {/* Footer Component */}
       <Footer />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
