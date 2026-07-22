@@ -37,13 +37,11 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ./drapeai-frontend/package.json
+          cache-dependency-path: ./drapeai-frontend/package-lock.json
 
       - name: Install Dependencies
         working-directory: ./drapeai-frontend
-        run: |
-          npm install
-          chmod -R +x node_modules/.bin || true
+        run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: Build Frontend Assets
         working-directory: ./drapeai-frontend
@@ -62,6 +60,8 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: image=moby/buildkit:latest
 
       - name: Log in to Docker Hub
         if: ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
@@ -79,6 +79,8 @@ jobs:
           tags: |
             amyynjendly/drapeai-backend:latest
             amyynjendly/drapeai-backend:${{ github.sha }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
 
       - name: Build & Push Frontend Image
         uses: docker/build-push-action@v5
@@ -89,3 +91,5 @@ jobs:
           tags: |
             amyynjendly/drapeai-frontend:latest
             amyynjendly/drapeai-frontend:${{ github.sha }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,scope=frontend,mode=max
