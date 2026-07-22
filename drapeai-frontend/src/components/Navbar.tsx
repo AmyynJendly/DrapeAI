@@ -10,59 +10,63 @@ export default function Navbar() {
   const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <nav className="bg-white border-b border-gray-100 py-4 px-4 sm:px-8 sticky top-0 z-40 backdrop-blur-md bg-white/90">
+    <nav className="bg-[#EFE8DD]/90 border-b border-black/10 py-4 px-4 sm:px-8 sticky top-0 z-40 backdrop-blur-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <div className="flex items-center gap-8">
-          <Link to="/" className="text-2xl sm:text-3xl font-black uppercase tracking-tighter text-black flex items-center gap-1.5 active:scale-95 transition-transform">
-            DRAPE.AI
-            <span className="inline-flex items-center justify-center bg-black text-white p-1.5 rounded-full text-[10px]">
-              <Sparkles className="w-3.5 h-3.5 text-yellow-400 animate-pulse" />
+          <Link to="/" className="text-2xl sm:text-3xl font-black uppercase tracking-tighter text-black flex items-center gap-2 font-serif-luxury active:scale-95 transition-transform">
+            Drape.AI
+            <span className="inline-flex items-center justify-center bg-black text-white p-1 rounded-full text-[10px]">
+              <Sparkles className="w-3 h-3 text-yellow-400 animate-pulse" />
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#catalog" className="nav-link-hover text-black text-sm font-bold tracking-wide uppercase transition">
+            <a href="#catalog" className="nav-link-hover text-black text-xs font-bold tracking-widest uppercase transition">
               Shop
             </a>
-            <a href="#catalog" className="nav-link-hover text-black text-sm font-bold tracking-wide uppercase transition">
+            <a href="#catalog" className="nav-link-hover text-black text-xs font-bold tracking-widest uppercase transition">
               On Sale
             </a>
-            <a href="#catalog" className="nav-link-hover text-black text-sm font-bold tracking-wide uppercase transition">
+            <a href="#catalog" className="nav-link-hover text-black text-xs font-bold tracking-widest uppercase transition">
               New Arrivals
             </a>
-            <Link to="/orders" className="nav-link-hover text-black text-sm font-bold tracking-wide uppercase transition">
+            <a href="#brands" className="nav-link-hover text-black text-xs font-bold tracking-widest uppercase transition">
+              Brands
+            </a>
+            <Link to="/orders" className="nav-link-hover text-black text-xs font-bold tracking-widest uppercase transition">
               My Orders
             </Link>
           </div>
         </div>
 
         {/* Search Bar */}
-        <div className="hidden sm:flex flex-1 max-w-md items-center bg-[#F0EEED] rounded-full px-4 py-2.5 text-sm text-black border border-transparent focus-within:border-black focus-within:bg-white transition-all shadow-inner">
-          <Search className="w-4 h-4 text-black/40 mr-2 flex-shrink-0" />
+        <div className="hidden sm:flex flex-1 max-w-xs lg:max-w-md items-center bg-[#D9C4A9]/50 rounded-full px-4 py-2 text-xs text-black border border-transparent focus-within:border-black focus-within:bg-white transition-all shadow-inner">
+          <Search className="w-4 h-4 text-black/50 mr-2 flex-shrink-0" />
           <input
             type="text"
             placeholder="Search for products, brands..."
-            className="bg-transparent border-none outline-none w-full text-black placeholder:text-black/40 text-sm font-medium"
+            className="bg-transparent border-none outline-none w-full text-black placeholder:text-black/50 text-xs font-medium"
           />
         </div>
 
-        {/* Action Icons & Auth */}
+        {/* Action Controls & Auth */}
         <div className="flex items-center gap-4">
           <button className="sm:hidden text-black hover:text-black/60 p-2 active:scale-90 transition-transform">
             <Search className="w-5 h-5" />
           </button>
 
-          {/* Cart Drawer Trigger */}
+          {/* Cart Trigger Button */}
           <button
             onClick={() => setIsCartOpen(true)}
-            className="relative text-black hover:text-black/60 p-2 active:scale-90 transition-transform cursor-pointer"
+            className="relative flex items-center gap-1.5 bg-[#D9C4A9]/60 hover:bg-black hover:text-white px-3 py-1.5 rounded-full text-xs font-bold text-black transition-all active:scale-95 cursor-pointer shadow-sm"
             title="View Cart"
           >
-            <ShoppingBag className="w-5 h-5" />
+            <ShoppingBag className="w-4 h-4" />
+            <span className="hidden sm:inline">Cart</span>
             {cartCount > 0 && (
-              <span className="absolute top-0 right-0 bg-black text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
+              <span className="bg-black text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
                 {cartCount}
               </span>
             )}
@@ -72,12 +76,12 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0EEED] hover:bg-black hover:text-white transition-all text-xs font-bold text-black shadow-sm active:scale-95 cursor-pointer"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9C4A9] hover:bg-black hover:text-white transition-all text-xs font-bold text-black shadow-sm active:scale-95 cursor-pointer"
               >
                 <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[11px] font-black">
                   {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </div>
-                <span className="hidden sm:inline max-w-[100px] truncate font-bold">{user?.name}</span>
+                <span className="hidden sm:inline max-w-[90px] truncate font-bold">{user?.name}</span>
               </button>
 
               {showMenu && (

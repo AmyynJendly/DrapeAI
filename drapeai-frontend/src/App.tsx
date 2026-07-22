@@ -9,6 +9,7 @@ import { CartProvider } from './context/CartContext';
 import TopBanner from './components/TopBanner';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
+import EditorialShowcase from './components/EditorialShowcase';
 import BrandBar from './components/BrandBar';
 import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
@@ -127,31 +128,34 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white flex flex-col">
-      {/* Top Announcement Banner */}
+    <div className="min-h-screen bg-[#EFE8DD] text-black font-sans selection:bg-black selection:text-white flex flex-col">
+      {/* 1. Announcement Banner */}
       <TopBanner />
 
-      {/* Navigation Bar */}
+      {/* 2. Warm Editorial Navbar */}
       <Navbar />
 
-      {/* Hero Section */}
+      {/* 3. Stitch Screen 1: Hero Section with Scroll Parallax */}
       <HeroSection />
 
-      {/* Brand Logo Bar */}
-      <BrandBar />
+      {/* 4. Warm Sand Brand Marquee */}
+      <BrandBar variant="beige" />
 
-      {/* Main Catalog Section */}
-      <main id="catalog" className="max-w-7xl mx-auto px-4 sm:px-8 py-16 flex-1 w-full">
+      {/* 5. Stitch Screen 3: Editorial Slit Showcase */}
+      <EditorialShowcase />
+
+      {/* 6. Stitch Screen 2: Main Catalog Grid with Layered Card Depth */}
+      <main id="catalog" className="max-w-7xl mx-auto px-4 sm:px-8 py-20 flex-1 w-full relative z-10">
         {/* Section Header */}
-        <div className="text-center space-y-4 mb-12">
-          <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tighter text-black">
+        <div className="text-center space-y-4 mb-14">
+          <h2 className="text-4xl sm:text-6xl font-normal uppercase tracking-tight text-black font-serif-luxury">
             NEW ARRIVALS
           </h2>
-          <p className="text-black/60 text-sm max-w-lg mx-auto font-medium">
+          <p className="text-black/70 text-sm max-w-lg mx-auto font-medium">
             Explore our latest high-street fashion catalog. Click "Try On with AI ✨" to preview any garment instantly.
           </p>
 
-          {/* Filter Categories Pills with Dynamic Animated Pill Slider */}
+          {/* Filter Categories Pills */}
           <div className="pt-4 flex flex-wrap justify-center gap-2">
             {[
               { id: 'all', label: 'All Items' },
@@ -162,7 +166,7 @@ function HomePage() {
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
                 className={`relative px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-colors duration-200 cursor-pointer active:scale-95 ${
-                  activeCategory === cat.id ? 'text-white' : 'text-black/70 hover:text-black bg-[#F0EEED]'
+                  activeCategory === cat.id ? 'text-white' : 'text-black/70 hover:text-black bg-[#D9C4A9]/60'
                 }`}
               >
                 {activeCategory === cat.id && (
@@ -178,11 +182,11 @@ function HomePage() {
           </div>
         </div>
 
-        {/* Offline Status Warning Notice if any */}
+        {/* Offline Status Warning */}
         {error && (
-          <div className="mb-8 p-4 rounded-2xl bg-[#F0EEED] border border-black/10 text-xs font-semibold text-black/70 flex items-center justify-between">
+          <div className="mb-8 p-4 rounded-2xl bg-[#D9C4A9] border border-black/10 text-xs font-semibold text-black/80 flex items-center justify-between">
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-amber-600 animate-pulse"></span>
               {error}
             </span>
             <button
@@ -201,7 +205,7 @@ function HomePage() {
             <p className="text-black/60 text-sm font-medium">Loading fashion items...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {products.map((product) => (
               <ProductCard
                 key={product.id}
@@ -213,17 +217,20 @@ function HomePage() {
         )}
 
         {/* View All Button */}
-        <div className="mt-12 text-center">
+        <div className="mt-16 text-center">
           <button
             onClick={() => setActiveCategory('all')}
-            className="px-14 py-4 rounded-full border border-black/10 text-black font-bold text-sm hover:bg-black hover:text-white transition-all duration-300"
+            className="px-14 py-4 rounded-full border-2 border-black text-black font-bold text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all duration-300 shadow-md active:scale-95 cursor-pointer"
           >
             View All Products
           </button>
         </div>
       </main>
 
-      {/* Interactive Try-On Studio Modal */}
+      {/* 7. Lower Black Ticker Marquee */}
+      <BrandBar variant="black" />
+
+      {/* 8. Interactive Try-On Studio Modal */}
       {selectedTryOnProduct && (
         <TryOnModal
           product={selectedTryOnProduct}
@@ -231,7 +238,7 @@ function HomePage() {
         />
       )}
 
-      {/* Footer Component */}
+      {/* 9. Footer Component */}
       <Footer />
     </div>
   );
