@@ -12,9 +12,10 @@ RUN mvn dependency:go-offline -B \
 
 # Now copy the source code and build (this layer re-runs only when src changes)
 COPY src ./src
-RUN mvn package -DskipTests -B -o \
+RUN mvn package -DskipTests -B \
     -Dmaven.wagon.http.retryHandler.count=5 \
-    -Dmaven.wagon.http.pool=false
+    -Dmaven.wagon.http.pool=false \
+    -Dmaven.wagon.rto=60000
 
 # Stage 2: Runtime environment using JDK 21 JRE
 FROM eclipse-temurin:21-jre-alpine
