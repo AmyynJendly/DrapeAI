@@ -42,6 +42,17 @@ export const productApi = {
     const response = await apiClient.get<Product>(`/products/${id}`);
     return response.data;
   },
+  createProduct: async (product: Partial<Product>): Promise<Product> => {
+    const response = await apiClient.post<Product>('/products', product);
+    return response.data;
+  },
+  updateProduct: async (id: string, product: Partial<Product>): Promise<Product> => {
+    const response = await apiClient.put<Product>(`/products/${id}`, product);
+    return response.data;
+  },
+  deleteProduct: async (id: string): Promise<void> => {
+    await apiClient.delete(`/products/${id}`);
+  },
 };
 
 export const tryOnApi = {
@@ -62,6 +73,14 @@ export const orderApi = {
   },
   getOrders: async (): Promise<OrderResponsePayload[]> => {
     const response = await apiClient.get<OrderResponsePayload[]>('/orders');
+    return response.data;
+  },
+  getAllOrdersAdmin: async (): Promise<OrderResponsePayload[]> => {
+    const response = await apiClient.get<OrderResponsePayload[]>('/orders/admin/all');
+    return response.data;
+  },
+  updateOrderStatus: async (orderId: string, status: string): Promise<OrderResponsePayload> => {
+    const response = await apiClient.put<OrderResponsePayload>(`/orders/${orderId}/status?status=${status}`);
     return response.data;
   },
 };

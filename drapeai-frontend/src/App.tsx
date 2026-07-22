@@ -17,6 +17,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
+import AdminPage from './pages/AdminPage';
 import TryOnModal from './components/TryOnModal';
 
 // Seeded fallback products matching Phase 1 spec in case backend is loading or offline
@@ -248,6 +249,7 @@ export default function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </BrowserRouter>
       </CartProvider>

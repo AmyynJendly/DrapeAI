@@ -29,4 +29,33 @@ public class ProductController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PostMapping
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        Product saved = productRepository.save(product);
+        return ResponseEntity.ok(saved);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable String id, @RequestBody Product product) {
+        return productRepository.findById(id)
+                .map(existing -> {
+                    existing.setName(product.getName());
+                    existing.setDescription(product.getDescription());
+                    existing.setCategory(product.getCategory());
+                    existing.setPrice(product.getPrice());
+                    existing.setImageUrl(product.getImageUrl());
+                    return ResponseEntity.ok(productRepository.save(existing));
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
+        if (productRepository.existsById(id)) {
+            productRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

@@ -96,6 +96,15 @@ export default function Navbar() {
                     My Orders
                   </Link>
 
+                  <Link
+                    to="/admin"
+                    onClick={() => setShowMenu(false)}
+                    className="w-full text-left px-4 py-2.5 text-xs font-bold text-black hover:bg-[#F0EEED] flex items-center gap-2 transition"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-yellow-500" />
+                    Admin Portal
+                  </Link>
+
                   <button
                     onClick={() => {
                       logout();

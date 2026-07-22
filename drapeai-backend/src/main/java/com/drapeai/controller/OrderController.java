@@ -33,4 +33,17 @@ public class OrderController {
         }
         return ResponseEntity.ok(orderService.getUserOrders(authentication.getName()));
     }
+
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<OrderResponse>> getAllOrdersAdmin() {
+        return ResponseEntity.ok(orderService.getAllOrdersAdmin());
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<OrderResponse> updateOrderStatus(
+            @PathVariable String id,
+            @RequestParam String status
+    ) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
+    }
 }

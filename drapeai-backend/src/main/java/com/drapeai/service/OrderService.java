@@ -6,6 +6,7 @@ import com.drapeai.model.dto.OrderResponse;
 import com.drapeai.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -47,6 +48,22 @@ public class OrderService {
         return orderRepository.findByUserEmailOrderByCreatedAtDesc(userEmail).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    public List<OrderResponse> getAllOrdersAdmin() {
+        return orderRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public OrderResponse updateOrderStatus(String orderId, String newStatusStr) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+
+        Order.OrderStatus newStatus = Order.OrderStatus.valueOf(newStatusStr.toUpperCase());
+        order.setStatus(newStatus);
+        Order updated = orderRepository.save(order);
+        return mapToResponse(updated);
     }
 
     private OrderResponse mapToResponse(Order order) {
