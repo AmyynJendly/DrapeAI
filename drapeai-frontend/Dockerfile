@@ -8,7 +8,7 @@ COPY package.json package-lock.json ./
 
 # Use BuildKit inline cache mount so npm packages survive across builds
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --prefer-offline --no-audit --no-fund
+    npm install --no-audit --no-fund
 
 COPY . .
 RUN npm run build
