@@ -4,58 +4,53 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 
 export default function HeroSection() {
   const { scrollY } = useScroll();
-  const yWatermark = useTransform(scrollY, [0, 700], [0, 140]);
-  const yModel = useTransform(scrollY, [0, 700], [0, -40]);
+  const yWatermark = useTransform(scrollY, [0, 600], [0, 100]);
+  const yModel = useTransform(scrollY, [0, 600], [0, -30]);
 
   return (
-    <section className="bg-[#E5DAC8] relative overflow-hidden min-h-[85vh] flex flex-col justify-center py-8">
-      {/* Giant Scroll-Linked Watermark — Bodoni Moda serif */}
+    <section className="bg-[#E5DAC8] relative overflow-hidden min-h-[85vh] flex flex-col justify-center py-12 lg:py-20">
+      {/* Subtle Background Watermark */}
       <motion.div
         style={{ y: yWatermark }}
         aria-hidden="true"
-        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden"
+        className="absolute inset-0 flex items-center justify-start pointer-events-none select-none z-0 overflow-hidden px-8"
       >
         <span
-          className="font-serif-luxury font-black uppercase text-[#C5B299] whitespace-nowrap leading-none opacity-40"
-          style={{ fontSize: 'clamp(140px, 24vw, 360px)', letterSpacing: '-0.03em' }}
+          className="font-serif-luxury font-black uppercase text-[#C5B299]/35 whitespace-nowrap leading-none"
+          style={{ fontSize: 'clamp(120px, 20vw, 300px)', letterSpacing: '-0.02em' }}
         >
-          DRAPE
+          DRAPE.AI
         </span>
       </motion.div>
 
-      {/* Main Hero Container */}
-      <div className="relative z-10 max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-16 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      {/* Main Container */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 lg:px-16 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           
-          {/* Left Column: Headline & Content */}
-          <div className="lg:col-span-6 space-y-6 pt-4 lg:pt-0">
-            {/* Spring Collection Pill */}
-            <div className="inline-flex items-center bg-[#C5B299]/70 text-[#3B2E22] text-[11px] font-bold px-4 py-1.5 rounded-full tracking-[0.15em] uppercase border border-[#B5A289]/40">
-              SPRING COLLECTION
+          {/* Left Column: Text & CTA */}
+          <div className="lg:col-span-6 space-y-6">
+            <div className="inline-flex items-center gap-2 bg-[#C5B299]/60 text-black text-xs font-bold px-4 py-1.5 rounded-full tracking-wider uppercase backdrop-blur-sm border border-black/5">
+              <span className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
+              Spring Collection 2026
             </div>
 
-            {/* Headline */}
             <h1
-              className="font-serif-luxury uppercase text-black leading-[0.92] font-black tracking-tight"
-              style={{ fontSize: 'clamp(44px, 5.5vw, 84px)' }}
+              className="font-serif-luxury text-black font-extrabold leading-[1.05] tracking-tight uppercase"
+              style={{ fontSize: 'clamp(40px, 4.8vw, 76px)' }}
             >
-              FIND<br />
-              CLOTHES<br />
-              THAT<br />
-              MATCH<br />
-              YOUR STYLE
+              Find Clothes<br />
+              That Match<br />
+              Your Style
             </h1>
 
-            {/* Description */}
-            <p className="text-black/70 text-sm sm:text-base leading-relaxed max-w-md font-normal font-sans">
-              Experience the intersection of high fashion and artificial intelligence. Curate your personal aesthetic with our precision-engineered recommendation engine.
+            <p className="text-black/70 text-base leading-relaxed max-w-md font-medium">
+              Browse through our diverse range of meticulously crafted garments, designed to bring out your individuality. Experience virtual try-on with instant AI visualization.
             </p>
 
-            {/* CTA */}
-            <div className="pt-2">
+            <div className="pt-2 flex items-center gap-4">
               <a
                 href="#catalog"
-                className="shimmer-btn inline-flex items-center justify-center gap-3 bg-black text-white px-8 py-3.5 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-black/90 transition-all shadow-xl active:scale-95 cursor-pointer"
+                className="shimmer-btn inline-flex items-center gap-3 bg-black text-white px-9 py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-black/90 transition-all shadow-xl active:scale-95 cursor-pointer"
               >
                 Shop Now
                 <ArrowRight className="w-4 h-4" />
@@ -63,32 +58,31 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Right Column: Large Rounded Dark Model Panel */}
+          {/* Right Column: Full-Height High-Fashion Model Visual */}
           <motion.div
             style={{ y: yModel }}
-            className="lg:col-span-6 relative h-[520px] sm:h-[640px] lg:h-[720px] w-full"
+            className="lg:col-span-6 relative h-[480px] sm:h-[580px] lg:h-[660px] w-full"
           >
-            <div className="absolute inset-0 rounded-[36px] overflow-hidden bg-[#1A1A1A] shadow-2xl border border-black/10">
+            <div className="absolute inset-0 rounded-[32px] overflow-hidden bg-[#111111] shadow-2xl border border-black/10">
               <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80"
-                alt="High Fashion Model in White Blazer Suit"
+                src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=80"
+                alt="High Fashion Model Full Outfit"
                 className="w-full h-full object-cover object-top grayscale opacity-90 transition-transform duration-700 hover:scale-105"
                 loading="eager"
               />
               
-              {/* Subtle dark gradient overlay for depth */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
               {/* Floating Glassmorphism Badge */}
-              <div className="absolute bottom-6 right-6 bg-black/40 backdrop-blur-xl rounded-2xl p-4 border border-white/20 text-white shadow-2xl flex items-center gap-3.5 max-w-[260px]">
+              <div className="absolute bottom-6 right-6 bg-black/50 backdrop-blur-xl rounded-2xl p-4 border border-white/20 text-white shadow-2xl flex items-center gap-3.5 max-w-[250px]">
                 <div className="w-9 h-9 rounded-xl bg-[#5A4533] flex items-center justify-center flex-shrink-0">
                   <Sparkles className="w-4.5 h-4.5 text-[#D9C4A9] animate-pulse" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.15em] text-white leading-tight">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-white leading-tight">
                     VIRTUAL TRY-ON READY
                   </p>
-                  <p className="text-[10px] text-white/60 font-medium mt-0.5">
+                  <p className="text-[10px] text-white/70 font-medium mt-0.5">
                     Powered by DrapeAI Engine
                   </p>
                 </div>

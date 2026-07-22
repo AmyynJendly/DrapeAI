@@ -4,6 +4,8 @@ import { Search, ShoppingBag, User, LogOut, Package, LayoutDashboard, Sparkles }
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
+import Logo from './Logo';
+
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const { cartCount, setIsCartOpen } = useCart();
@@ -26,17 +28,9 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Center: Brand Logo */}
+        {/* Center: Official Brand Logo */}
         <div className="flex justify-center">
-          <Link
-            to="/"
-            className="font-serif-luxury font-bold text-2xl tracking-tight text-black hover:opacity-80 transition-opacity flex items-center gap-1.5"
-          >
-            DRAPE.AI
-            <div className="w-5 h-5 bg-[#5A4533] rounded-full flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-2.5 h-2.5 text-[#D9C4A9]" />
-            </div>
-          </Link>
+          <Logo size="md" variant="dark" />
         </div>
 
         {/* Right: Utility Icons */}

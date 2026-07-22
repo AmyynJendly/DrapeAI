@@ -21,7 +21,7 @@ export default function BrandBar({ variant = 'black' }: BrandBarProps) {
 
   const bgClasses = variant === 'tan'
     ? 'bg-[#C5B299] text-black border-y border-black/10'
-    : 'bg-black text-white py-6';
+    : 'bg-[#111111] text-white py-5 shadow-inner';
 
   return (
     <section id="brands" className={`${bgClasses} overflow-hidden relative z-10 select-none`}>
@@ -32,12 +32,12 @@ export default function BrandBar({ variant = 'black' }: BrandBarProps) {
               key={`${brand}-${index}`}
               className="flex items-center gap-12 sm:gap-16 flex-shrink-0"
             >
-              <span className={`text-2xl sm:text-3xl font-black uppercase tracking-[0.2em] font-serif-luxury cursor-pointer transition-opacity ${
-                variant === 'tan' ? 'text-black opacity-90 hover:opacity-100' : 'text-white opacity-95 hover:opacity-100'
+              <span className={`text-xl sm:text-2xl font-black uppercase tracking-[0.25em] font-serif-luxury cursor-pointer transition-opacity ${
+                variant === 'tan' ? 'text-black opacity-90 hover:opacity-100' : 'text-white/90 hover:text-white'
               }`}>
                 {brand}
               </span>
-              <span className={`text-xs font-mono ${variant === 'tan' ? 'text-black/40' : 'text-white/40'}`}>
+              <span className={`text-xs ${variant === 'tan' ? 'text-black/40' : 'text-white/30'}`}>
                 •
               </span>
             </div>

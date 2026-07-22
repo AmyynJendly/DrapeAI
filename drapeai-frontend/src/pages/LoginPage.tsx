@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import Logo from '../components/Logo';
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,18 +32,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col overflow-hidden relative">
 
-      {/* ═══ SPLIT BACKGROUND (matching Stitch Screen 2 exactly) ═══ */}
+      {/* ═══ SPLIT BACKGROUND ═══ */}
       <div className="absolute inset-0 flex z-0">
-        {/* Left half: sand with DRAPE.AI watermark */}
         <div className="w-1/2 bg-[#E5DAC8] relative overflow-hidden flex flex-col justify-center px-12">
-          {/* Watermark */}
           <div className="absolute inset-0 flex items-center justify-start pointer-events-none select-none overflow-hidden" aria-hidden="true">
             <span className="font-serif-luxury font-black uppercase text-[#C5B299] leading-none whitespace-nowrap"
               style={{ fontSize: 'clamp(100px, 18vw, 240px)', letterSpacing: '-0.02em', opacity: 0.45 }}>
               DRAPE.AI
             </span>
           </div>
-          {/* Hero text content visible in background */}
           <div className="relative z-10 space-y-5 pt-24">
             <div className="inline-flex items-center bg-[#C5B299] text-[#3B2E22] text-xs font-bold px-4 py-1.5 rounded-full tracking-wider uppercase">
               Spring Collection
@@ -58,7 +57,6 @@ export default function LoginPage() {
             </Link>
           </div>
         </div>
-        {/* Right half: dark fashion model */}
         <div className="w-1/2 bg-[#1A1A1A] relative overflow-hidden">
           <img
             src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1000&q=80"
@@ -71,12 +69,7 @@ export default function LoginPage() {
 
       {/* ═══ Navbar ═══ */}
       <nav className="relative z-20 py-4 px-6 sm:px-12 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-serif-luxury font-black text-xl text-black">
-          <div className="w-7 h-7 bg-[#5A4533] rounded-md flex items-center justify-center">
-            <Sparkles className="w-3.5 h-3.5 text-[#D9C4A9]" />
-          </div>
-          Drape.AI
-        </Link>
+        <Logo size="md" variant="dark" />
         <div className="hidden md:flex items-center gap-8">
           {['Shop', 'On Sale', 'New Arrivals', 'Brands'].map(item => (
             <Link key={item} to="/" className="text-black/70 text-sm font-semibold hover:text-black transition-colors">{item}</Link>
@@ -100,13 +93,10 @@ export default function LoginPage() {
           <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-8">
             {/* Logo */}
             <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 bg-[#5A4533] rounded-md flex items-center justify-center">
-                  <Sparkles className="w-3.5 h-3.5 text-[#D9C4A9]" />
-                </div>
-                <span className="font-serif-luxury font-black text-lg text-black">Drape.AI</span>
+              <div className="inline-flex justify-center mb-3">
+                <Logo size="md" variant="dark" />
               </div>
-              <h1 className="text-2xl font-serif-luxury font-bold text-black">Welcome Back</h1>
+              <h1 className="text-2xl font-serif-luxury font-bold text-black mt-1">Welcome Back</h1>
             </div>
 
             {error && (

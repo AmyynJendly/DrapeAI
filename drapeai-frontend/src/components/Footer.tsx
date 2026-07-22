@@ -1,13 +1,13 @@
-import React from 'react';
-import { Mail, Sparkles } from 'lucide-react';
+import Logo from './Logo';
+import { Mail } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#F0EEED] pt-16 pb-8 border-t border-black/5 mt-20">
+    <footer className="bg-[#E5DAC8] pt-16 pb-8 border-t border-black/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         {/* Newsletter Subscription Box */}
-        <div className="bg-black text-white rounded-[20px] p-8 md:p-12 mb-16 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
-          <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter max-w-md leading-tight">
+        <div className="bg-[#111111] text-white rounded-[24px] p-8 md:p-12 mb-16 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+          <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight max-w-md leading-tight">
             STAY UP TO DATE ABOUT OUR LATEST OFFERS
           </h2>
           <div className="w-full md:w-auto flex flex-col gap-3 min-w-[300px]">
@@ -19,7 +19,7 @@ export default function Footer() {
                 className="bg-transparent border-none outline-none text-sm w-full text-black placeholder:text-black/40"
               />
             </div>
-            <button className="bg-white text-black font-semibold text-sm py-3 px-6 rounded-full hover:bg-white/90 transition text-center">
+            <button className="bg-white text-black font-semibold text-sm py-3 px-6 rounded-full hover:bg-white/90 transition text-center cursor-pointer">
               Subscribe to Newsletter
             </button>
           </div>
@@ -28,11 +28,8 @@ export default function Footer() {
         {/* Footer Links & Info */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 pb-12 border-b border-black/10">
           <div className="md:col-span-2 space-y-4">
-            <a href="#" className="text-2xl font-black uppercase tracking-tighter text-black flex items-center gap-1.5">
-              DRAPE.AI
-              <Sparkles className="w-4 h-4 text-black" />
-            </a>
-            <p className="text-sm text-black/60 max-w-sm">
+            <Logo size="md" variant="dark" />
+            <p className="text-sm text-black/70 max-w-sm font-medium">
               We have clothes that suit your style and which you're proud to wear. Try them on virtually using our cutting-edge AI engine.
             </p>
           </div>

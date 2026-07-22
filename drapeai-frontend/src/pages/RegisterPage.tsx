@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 
 const STEPS = ['Your Info', 'Account', 'Done'];
 
+import Logo from '../components/Logo';
+
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
@@ -38,9 +40,8 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex flex-col overflow-hidden relative">
 
-      {/* ═══ SPLIT BACKGROUND (matching Stitch Screen 1 exactly) ═══ */}
+      {/* ═══ SPLIT BACKGROUND ═══ */}
       <div className="absolute inset-0 flex z-0">
-        {/* Left half: sand with DRAPE.AI watermark + hero content */}
         <div className="w-1/2 bg-[#E5DAC8] relative overflow-hidden flex flex-col justify-center px-12">
           <div className="absolute inset-0 flex items-center justify-start pointer-events-none select-none overflow-hidden" aria-hidden="true">
             <span className="font-serif-luxury font-black uppercase text-[#C5B299] leading-none whitespace-nowrap"
@@ -64,7 +65,6 @@ export default function RegisterPage() {
             </Link>
           </div>
         </div>
-        {/* Right half: dark fashion model */}
         <div className="w-1/2 bg-[#1A1A1A] relative overflow-hidden">
           <img
             src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1000&q=80"
@@ -77,12 +77,7 @@ export default function RegisterPage() {
 
       {/* ═══ Navbar ═══ */}
       <nav className="relative z-20 py-4 px-6 sm:px-12 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-serif-luxury font-black text-xl text-black">
-          <div className="w-7 h-7 bg-[#5A4533] rounded-md flex items-center justify-center">
-            <Sparkles className="w-3.5 h-3.5 text-[#D9C4A9]" />
-          </div>
-          Drape.AI
-        </Link>
+        <Logo size="md" variant="dark" />
         <div className="hidden md:flex items-center gap-8">
           {['Shop', 'On Sale', 'New Arrivals', 'Brands'].map(item => (
             <Link key={item} to="/" className="text-black/70 text-sm font-semibold hover:text-black transition-colors">{item}</Link>

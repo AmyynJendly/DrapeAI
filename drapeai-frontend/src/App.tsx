@@ -121,38 +121,38 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#E5DAC8] text-black font-sans flex flex-col">
-      {/* 1. Top Black Announcement Banner */}
+      {/* 1. Announcement Banner */}
       <TopBanner />
 
-      {/* 2. Clean Minimal Navbar */}
+      {/* 2. Minimalist Navbar */}
       <Navbar />
 
-      {/* 3. Hero Section — Stitch Screen 1 */}
+      {/* 3. Solution 3 Minimalist Hero Section */}
       <HeroSection />
 
-      {/* 4. Warm Tan Brand Ticker */}
-      <BrandBar variant="tan" />
+      {/* 4. Sleek Brand Ticker */}
+      <BrandBar variant="black" />
 
-      {/* 5. Editorial Dark Showcase — Stitch Screen 3 */}
+      {/* 5. Solution 3 Editorial Showcase */}
       <EditorialShowcase />
 
-      {/* 6. Product Catalog — WHITE background section, Stitch Screen 2 */}
-      <section id="catalog" className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-6 sm:px-12">
-          {/* Header */}
+      {/* 6. Product Catalog — Seamless Sand Canvas matching Login aesthetic */}
+      <section id="catalog" className="py-16 px-6 sm:px-12">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
           <div className="text-center mb-12 space-y-4">
             <h2
-              className="font-black uppercase text-black font-serif-luxury"
-              style={{ fontSize: 'clamp(36px, 5vw, 72px)', letterSpacing: '-0.02em' }}
+              className="font-extrabold uppercase text-black font-serif-luxury tracking-tight"
+              style={{ fontSize: 'clamp(32px, 4vw, 64px)' }}
             >
-              NEW ARRIVALS
+              New Arrivals
             </h2>
-            <p className="text-black/60 text-sm max-w-xl mx-auto font-medium leading-relaxed">
+            <p className="text-black/70 text-sm max-w-xl mx-auto font-medium leading-relaxed">
               Explore our latest high-street fashion catalog. Click "Try On with AI ✨" to preview any garment instantly.
             </p>
 
             {/* Category Pills */}
-            <div className="flex flex-wrap justify-center gap-2 pt-2">
+            <div className="flex flex-wrap justify-center gap-2.5 pt-2">
               {[
                 { id: 'all', label: 'All Items' },
                 { id: 'apparel', label: 'Apparel' },
@@ -161,59 +161,48 @@ function HomePage() {
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`relative px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer active:scale-95 ${
-                    activeCategory === cat.id ? 'text-white' : 'text-black/60 hover:text-black bg-[#F0EEED]'
+                  className={`relative px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 ${
+                    activeCategory === cat.id ? 'bg-black text-white shadow-md' : 'bg-[#C5B299]/50 text-black/80 hover:bg-[#C5B299]'
                   }`}
                 >
-                  {activeCategory === cat.id && (
-                    <motion.div
-                      layoutId="catTab"
-                      className="absolute inset-0 bg-black rounded-full z-0"
-                      transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-                    />
-                  )}
-                  <span className="relative z-10">{cat.label}</span>
+                  {cat.label}
                 </button>
               ))}
             </div>
           </div>
 
           {error && (
-            <div className="mb-8 p-4 rounded-2xl bg-[#FFF8F0] border border-amber-100 text-xs font-semibold text-amber-800 flex items-center justify-between">
+            <div className="mb-8 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-900 flex items-center justify-between">
               <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                 {error}
               </span>
               <button onClick={fetchProducts} className="font-bold underline hover:no-underline">Retry</button>
             </div>
           )}
 
-          {/* Product Grid with Tan Slab Depth Effect */}
+          {/* Product Grid */}
           {loading ? (
             <div className="py-24 flex flex-col items-center gap-4">
               <Loader2 className="w-10 h-10 animate-spin text-black" />
               <p className="text-black/50 text-sm font-medium">Loading fashion items...</p>
             </div>
           ) : (
-            <div className="relative">
-              {/* Tan slab behind cards */}
-              <div className="absolute inset-x-0 top-8 bottom-8 bg-[#C5B299] rounded-[36px] -z-10 shadow-xl" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-8 px-4">
-                {products.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onTryOn={(p) => setSelectedTryOnProduct(p)}
-                  />
-                ))}
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onTryOn={(p) => setSelectedTryOnProduct(p)}
+                />
+              ))}
             </div>
           )}
 
-          <div className="mt-16 text-center">
+          <div className="mt-14 text-center">
             <button
               onClick={() => setActiveCategory('all')}
-              className="px-14 py-4 rounded-full border-2 border-black text-black font-bold text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all duration-300 shadow-sm active:scale-95 cursor-pointer"
+              className="px-12 py-4 rounded-full border-2 border-black text-black font-bold text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all duration-300 shadow-sm active:scale-95 cursor-pointer"
             >
               View All Products
             </button>
@@ -221,7 +210,7 @@ function HomePage() {
         </div>
       </section>
 
-      {/* 7. Solid Black Brand Ticker — Stitch Screen 2 */}
+      {/* 7. Bottom Brand Ticker */}
       <BrandBar variant="black" />
 
       {/* 8. Try-On Modal */}
