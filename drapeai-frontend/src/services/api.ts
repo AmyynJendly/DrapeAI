@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Product } from '../types';
+import { Product, TryOnRequest, TryOnResponse } from '../types';
 import { AuthResponse, LoginRequest, RegisterRequest } from '../types/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -39,6 +39,17 @@ export const productApi = {
   },
   getProductById: async (id: string): Promise<Product> => {
     const response = await apiClient.get<Product>(`/products/${id}`);
+    return response.data;
+  },
+};
+
+export const tryOnApi = {
+  processTryOn: async (data: TryOnRequest): Promise<TryOnResponse> => {
+    const response = await apiClient.post<TryOnResponse>('/try-on/process', data);
+    return response.data;
+  },
+  getHistory: async (): Promise<TryOnResponse[]> => {
+    const response = await apiClient.get<TryOnResponse[]>('/try-on/history');
     return response.data;
   },
 };

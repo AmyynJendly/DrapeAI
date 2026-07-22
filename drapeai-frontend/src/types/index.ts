@@ -6,3 +6,21 @@ export interface Product {
   price: number;
   imageUrl: string;
 }
+
+export interface TryOnRequest {
+  productId: string;
+  userImage: string;
+  category: string;
+}
+
+export interface TryOnResponse {
+  id: string;
+  productId: string;
+  productName: string;
+  category: string;
+  userImageUrl: string;
+  resultImageUrl: string;
+  status: string;
+  message?: string;
+  createdAt?: string;
+}

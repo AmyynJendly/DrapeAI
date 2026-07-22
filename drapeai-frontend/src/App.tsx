@@ -12,6 +12,7 @@ import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import TryOnModal from './components/TryOnModal';
 
 // Seeded fallback products matching Phase 1 spec in case backend is loading or offline
 const MOCK_PRODUCTS: Product[] = [
@@ -211,27 +212,12 @@ function HomePage() {
         </div>
       </main>
 
-      {/* Try-On Modal Notice */}
+      {/* Interactive Try-On Studio Modal */}
       {selectedTryOnProduct && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[24px] max-w-md w-full p-8 shadow-2xl space-y-6 text-center border border-black/10">
-            <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center mx-auto shadow-lg">
-              <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-            </div>
-            <h3 className="text-2xl font-black uppercase text-black tracking-tight">
-              Virtual Try-On: {selectedTryOnProduct.name}
-            </h3>
-            <p className="text-sm text-black/60">
-              Select your photo to preview <span className="font-bold text-black">{selectedTryOnProduct.name}</span> with AI.
-            </p>
-            <button
-              onClick={() => setSelectedTryOnProduct(null)}
-              className="w-full bg-black text-white py-3.5 rounded-full font-bold text-sm hover:bg-black/80 transition"
-            >
-              Close Preview
-            </button>
-          </div>
-        </div>
+        <TryOnModal
+          product={selectedTryOnProduct}
+          onClose={() => setSelectedTryOnProduct(null)}
+        />
       )}
 
       {/* Footer Component */}
