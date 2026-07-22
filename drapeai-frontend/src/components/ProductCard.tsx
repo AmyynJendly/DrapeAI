@@ -29,7 +29,7 @@ export default function ProductCard({ product, onTryOn }: ProductCardProps) {
         <img
           src={getOptimizedUrl(product.imageUrl)}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+          className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500 ease-out"
           loading="lazy"
           decoding="async"
         />

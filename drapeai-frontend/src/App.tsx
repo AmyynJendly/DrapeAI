@@ -21,7 +21,6 @@ import OrdersPage from './pages/OrdersPage';
 import AdminPage from './pages/AdminPage';
 import TryOnModal from './components/TryOnModal';
 
-// Seeded fallback products matching Phase 1 spec in case backend is loading or offline
 const MOCK_PRODUCTS: Product[] = [
   {
     id: '1',
@@ -108,8 +107,7 @@ function HomePage() {
         setProducts(MOCK_PRODUCTS);
       }
     } catch (err: any) {
-      console.warn('Backend offline, using fallback products:', err);
-      setError('Spring Boot backend offline (Showing offline preview catalog).');
+      setError('Backend offline — showing preview catalog.');
       const filtered = activeCategory === 'all'
         ? MOCK_PRODUCTS
         : MOCK_PRODUCTS.filter(p => p.category === activeCategory);
@@ -119,123 +117,114 @@ function HomePage() {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, [activeCategory]);
-
-  const handleTryOn = (product: Product) => {
-    setSelectedTryOnProduct(product);
-  };
+  useEffect(() => { fetchProducts(); }, [activeCategory]);
 
   return (
-    <div className="min-h-screen bg-[#E5DAC8] text-black font-sans selection:bg-black selection:text-white flex flex-col">
-      {/* 1. Announcement Banner */}
+    <div className="min-h-screen bg-[#E5DAC8] text-black font-sans flex flex-col">
+      {/* 1. Top Black Announcement Banner */}
       <TopBanner />
 
-      {/* 2. Warm Editorial Navbar */}
+      {/* 2. Clean Minimal Navbar */}
       <Navbar />
 
-      {/* 3. Stitch Screen 1: Hero Section with Parallax Watermark */}
+      {/* 3. Hero Section — Stitch Screen 1 */}
       <HeroSection />
 
-      {/* 4. Warm Sand Brand Ticker */}
+      {/* 4. Warm Tan Brand Ticker */}
       <BrandBar variant="tan" />
 
-      {/* 5. Stitch Screen 3: Editorial Slit Showcase */}
+      {/* 5. Editorial Dark Showcase — Stitch Screen 3 */}
       <EditorialShowcase />
 
-      {/* 6. Stitch Screen 2: Catalog Grid with Layered Horizontal Tan Slab */}
-      <main id="catalog" className="max-w-7xl mx-auto px-4 sm:px-8 py-20 flex-1 w-full relative z-10">
-        {/* Section Header */}
-        <div className="text-center space-y-4 mb-14">
-          <h2 className="text-4xl sm:text-6xl font-normal uppercase tracking-tight text-black font-serif-luxury">
-            NEW ARRIVALS
-          </h2>
-          <p className="text-black/75 text-sm max-w-lg mx-auto font-medium">
-            Explore our latest high-street fashion catalog. Click "Try On with AI ✨" to preview any garment instantly.
-          </p>
-
-          {/* Filter Categories Pills */}
-          <div className="pt-4 flex flex-wrap justify-center gap-2">
-            {[
-              { id: 'all', label: 'All Items' },
-              { id: 'apparel', label: 'Apparel' },
-              { id: 'footwear', label: 'Footwear' },
-            ].map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`relative px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-colors duration-200 cursor-pointer active:scale-95 ${
-                  activeCategory === cat.id ? 'text-white' : 'text-black/70 hover:text-black bg-[#C5B299]/60'
-                }`}
-              >
-                {activeCategory === cat.id && (
-                  <motion.div
-                    layoutId="activeCategoryTab"
-                    className="absolute inset-0 bg-black rounded-full shadow-md z-0"
-                    transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-                  />
-                )}
-                <span className="relative z-10">{cat.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Offline Status Warning */}
-        {error && (
-          <div className="mb-8 p-4 rounded-2xl bg-[#C5B299] border border-black/10 text-xs font-semibold text-black/80 flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-600 animate-pulse"></span>
-              {error}
-            </span>
-            <button
-              onClick={fetchProducts}
-              className="text-black underline hover:no-underline font-bold"
+      {/* 6. Product Catalog — WHITE background section, Stitch Screen 2 */}
+      <section id="catalog" className="bg-white py-20">
+        <div className="max-w-7xl mx-auto px-6 sm:px-12">
+          {/* Header */}
+          <div className="text-center mb-12 space-y-4">
+            <h2
+              className="font-black uppercase text-black font-serif-luxury"
+              style={{ fontSize: 'clamp(36px, 5vw, 72px)', letterSpacing: '-0.02em' }}
             >
-              Retry Connection
-            </button>
-          </div>
-        )}
+              NEW ARRIVALS
+            </h2>
+            <p className="text-black/60 text-sm max-w-xl mx-auto font-medium leading-relaxed">
+              Explore our latest high-street fashion catalog. Click "Try On with AI ✨" to preview any garment instantly.
+            </p>
 
-        {/* Product Grid Container with Layered Horizontal Tan Slab matching Stitch Screen 2 */}
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <Loader2 className="w-10 h-10 text-black animate-spin" />
-            <p className="text-black/60 text-sm font-medium">Loading fashion items...</p>
-          </div>
-        ) : (
-          <div className="relative py-8 px-4 sm:px-6 rounded-[36px]">
-            {/* Giant Horizontal Tan Slab Layer behind product cards matching Stitch Screen 2 */}
-            <div className="absolute inset-x-0 top-12 bottom-12 bg-[#C5B299] rounded-[36px] border border-black/5 -z-10 shadow-xl" />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onTryOn={handleTryOn}
-                />
+            {/* Category Pills */}
+            <div className="flex flex-wrap justify-center gap-2 pt-2">
+              {[
+                { id: 'all', label: 'All Items' },
+                { id: 'apparel', label: 'Apparel' },
+                { id: 'footwear', label: 'Footwear' },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`relative px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer active:scale-95 ${
+                    activeCategory === cat.id ? 'text-white' : 'text-black/60 hover:text-black bg-[#F0EEED]'
+                  }`}
+                >
+                  {activeCategory === cat.id && (
+                    <motion.div
+                      layoutId="catTab"
+                      className="absolute inset-0 bg-black rounded-full z-0"
+                      transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                    />
+                  )}
+                  <span className="relative z-10">{cat.label}</span>
+                </button>
               ))}
             </div>
           </div>
-        )}
 
-        {/* View All Button */}
-        <div className="mt-16 text-center">
-          <button
-            onClick={() => setActiveCategory('all')}
-            className="px-14 py-4 rounded-full border-2 border-black text-black font-bold text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all duration-300 shadow-md active:scale-95 cursor-pointer"
-          >
-            View All Products
-          </button>
+          {error && (
+            <div className="mb-8 p-4 rounded-2xl bg-[#FFF8F0] border border-amber-100 text-xs font-semibold text-amber-800 flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                {error}
+              </span>
+              <button onClick={fetchProducts} className="font-bold underline hover:no-underline">Retry</button>
+            </div>
+          )}
+
+          {/* Product Grid with Tan Slab Depth Effect */}
+          {loading ? (
+            <div className="py-24 flex flex-col items-center gap-4">
+              <Loader2 className="w-10 h-10 animate-spin text-black" />
+              <p className="text-black/50 text-sm font-medium">Loading fashion items...</p>
+            </div>
+          ) : (
+            <div className="relative">
+              {/* Tan slab behind cards */}
+              <div className="absolute inset-x-0 top-8 bottom-8 bg-[#C5B299] rounded-[36px] -z-10 shadow-xl" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-8 px-4">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onTryOn={(p) => setSelectedTryOnProduct(p)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-16 text-center">
+            <button
+              onClick={() => setActiveCategory('all')}
+              className="px-14 py-4 rounded-full border-2 border-black text-black font-bold text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all duration-300 shadow-sm active:scale-95 cursor-pointer"
+            >
+              View All Products
+            </button>
+          </div>
         </div>
-      </main>
+      </section>
 
-      {/* 7. Lower Black Ticker Marquee matching Stitch Screen 2 */}
+      {/* 7. Solid Black Brand Ticker — Stitch Screen 2 */}
       <BrandBar variant="black" />
 
-      {/* 8. Interactive Try-On Studio Modal */}
+      {/* 8. Try-On Modal */}
       {selectedTryOnProduct && (
         <TryOnModal
           product={selectedTryOnProduct}
@@ -243,7 +232,7 @@ function HomePage() {
         />
       )}
 
-      {/* 9. Footer Component */}
+      {/* 9. Footer */}
       <Footer />
     </div>
   );
