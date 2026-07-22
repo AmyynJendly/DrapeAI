@@ -8,7 +8,6 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onTryOn }: ProductCardProps) {
-  // Generate consistent mock rating and discount based on product price for demonstration
   const ratingScore = 4.5;
   const originalPrice = Math.round(product.price * 1.25);
   const discountPercent = -20;
@@ -22,61 +21,62 @@ export default function ProductCard({ product, onTryOn }: ProductCardProps) {
   };
 
   return (
-    <div className="bg-[#F0EEED] rounded-[20px] p-4 flex flex-col justify-between overflow-hidden group hover:shadow-lg transition-all duration-300 border border-transparent hover:border-black/10">
-      {/* Product Image */}
-      <div className="relative aspect-square md:aspect-[3/4] w-full overflow-hidden rounded-[12px] bg-[#E8E6E5]">
+    <div className="bg-[#F0EEED] rounded-[24px] p-4 flex flex-col justify-between overflow-hidden group hover:shadow-xl hover:shadow-black/5 transition-all duration-300 border border-transparent hover:border-black/10">
+      {/* 1. Image Container */}
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-[#E8E6E5]">
         <img
           src={getOptimizedUrl(product.imageUrl)}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           loading="lazy"
           decoding="async"
         />
-        <div className="absolute top-2.5 left-2.5">
-          <span className="bg-black/90 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full backdrop-blur-md">
+        {/* Glassmorphism Category Overlay Pill */}
+        <div className="absolute top-3 left-3">
+          <span className="backdrop-blur-md bg-black/80 text-white text-[10px] font-extrabold uppercase tracking-wider px-3 py-1.5 rounded-full border border-white/10 shadow-sm">
             {product.category}
           </span>
         </div>
       </div>
 
-      {/* Product Information */}
-      <div className="mt-3 flex flex-col justify-between flex-1 space-y-2">
-        <h3 className="text-base font-bold text-black truncate group-hover:text-black/80 transition-colors">
+      {/* 2. Product Details */}
+      <div className="mt-4 flex flex-col justify-between flex-1 space-y-2.5">
+        <h3 className="text-lg font-bold text-black truncate group-hover:text-black/80 transition-colors">
           {product.name}
         </h3>
 
         {/* Rating Stars */}
-        <div className="flex items-center gap-1.5 text-xs text-black/70">
+        <div className="flex items-center gap-1.5 text-xs text-black/70 font-semibold">
           <div className="flex items-center gap-0.5">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className="w-3.5 h-3.5 text-[#FFC700] fill-[#FFC700]"
+                className="w-4 h-4 text-[#FFC700] fill-[#FFC700]"
               />
             ))}
           </div>
-          <span className="font-semibold text-black">{ratingScore}/5</span>
+          <span className="font-bold text-black">{ratingScore}/5</span>
         </div>
 
-        {/* Price & Discount */}
+        {/* Pricing Hierarchy */}
         <div className="flex items-center gap-2 pt-1">
-          <span className="text-xl font-extrabold text-black">
+          <span className="text-2xl font-black text-black">
             ${product.price.toFixed(0)}
           </span>
-          <span className="text-sm font-bold text-black/40 line-through">
+          <span className="text-base font-bold text-black/40 line-through">
             ${originalPrice}
           </span>
-          <span className="bg-[#FF3333]/10 text-[#FF3333] text-xs font-bold px-2 py-0.5 rounded-full">
+          <span className="bg-[#FF3333]/10 text-[#FF3333] text-xs font-bold px-2.5 py-0.5 rounded-full">
             {discountPercent}%
           </span>
         </div>
 
-        {/* AI Try-On Button */}
+        {/* 3. Action Button ("Try On with AI ✨") */}
         <button
           onClick={() => onTryOn?.(product)}
-          className="w-full bg-black text-white text-xs py-2.5 rounded-full font-medium hover:bg-black/80 flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 mt-2"
+          className="shimmer-btn w-full bg-black text-white text-xs py-3 rounded-full font-bold hover:bg-black/90 flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 mt-2 cursor-pointer"
         >
-          <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
+          <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
           Try On with AI ✨
         </button>
       </div>

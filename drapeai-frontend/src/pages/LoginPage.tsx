@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, ArrowRight, Lock, Mail } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -26,31 +27,41 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0EEED] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-3xl font-black uppercase tracking-tighter text-black">
+    <div className="min-h-screen bg-[#F0EEED] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="sm:mx-auto sm:w-full sm:max-w-md text-center"
+      >
+        <Link to="/" className="inline-flex items-center gap-1.5 text-3xl font-black uppercase tracking-tighter text-black active:scale-95 transition-transform">
           DRAPE.AI
-          <Sparkles className="w-5 h-5 text-black" />
+          <Sparkles className="w-5 h-5 text-black animate-pulse" />
         </Link>
         <h2 className="mt-4 text-2xl sm:text-3xl font-black uppercase tracking-tight text-black">
           Welcome Back
         </h2>
-        <p className="mt-2 text-sm text-black/60 font-medium">
+        <p className="mt-2 text-sm text-black/60 font-semibold">
           Log in to access your virtual try-on studio
         </p>
-      </div>
+      </motion.div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white py-8 px-6 sm:px-10 shadow-xl rounded-[24px] border border-black/5">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4"
+      >
+        <div className="bg-white py-8 px-6 sm:px-10 shadow-2xl shadow-black/5 rounded-[32px] border border-black/5">
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-600">
+            <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-xs font-semibold text-red-600">
               {error}
             </div>
           )}
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-black mb-2">
+              <label className="block text-xs font-black uppercase tracking-wider text-black mb-2">
                 Email Address
               </label>
               <div className="relative">
@@ -63,13 +74,13 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-[#F0EEED] rounded-xl text-sm font-medium text-black placeholder:text-black/40 border border-transparent focus:border-black focus:bg-white focus:outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-[#F0EEED] rounded-2xl text-sm font-medium text-black placeholder:text-black/40 border border-transparent focus:ring-2 focus:ring-black focus:bg-white focus:outline-none transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-black mb-2">
+              <label className="block text-xs font-black uppercase tracking-wider text-black mb-2">
                 Password
               </label>
               <div className="relative">
@@ -82,7 +93,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 bg-[#F0EEED] rounded-xl text-sm font-medium text-black placeholder:text-black/40 border border-transparent focus:border-black focus:bg-white focus:outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-[#F0EEED] rounded-2xl text-sm font-medium text-black placeholder:text-black/40 border border-transparent focus:ring-2 focus:ring-black focus:bg-white focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -90,7 +101,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-black text-white py-3.5 px-4 rounded-full font-bold text-sm hover:bg-black/80 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 disabled:opacity-50"
+              className="shimmer-btn w-full bg-black text-white py-4 px-4 rounded-full font-bold text-sm hover:bg-black/90 transition-all flex items-center justify-center gap-2 shadow-xl active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? 'Signing in...' : 'Sign In'}
               <ArrowRight className="w-4 h-4" />
@@ -98,7 +109,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center border-t border-black/5 pt-6">
-            <p className="text-xs text-black/60 font-medium">
+            <p className="text-xs text-black/60 font-semibold">
               Don't have an account?{' '}
               <Link to="/register" className="font-bold text-black underline hover:no-underline">
                 Sign Up Now
@@ -106,7 +117,7 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

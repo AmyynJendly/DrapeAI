@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Loader2, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Product } from './types';
 import { productApi } from './services/api';
 import { AuthProvider } from './context/AuthContext';
@@ -145,7 +146,7 @@ function HomePage() {
             Explore our latest high-street fashion catalog. Click "Try On with AI ✨" to preview any garment instantly.
           </p>
 
-          {/* Filter Categories Pills */}
+          {/* Filter Categories Pills with Dynamic Animated Pill Slider */}
           <div className="pt-4 flex flex-wrap justify-center gap-2">
             {[
               { id: 'all', label: 'All Items' },
@@ -155,13 +156,18 @@ function HomePage() {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all duration-200 ${
-                  activeCategory === cat.id
-                    ? 'bg-black text-white shadow-md'
-                    : 'bg-[#F0EEED] text-black/70 hover:text-black hover:bg-black/10'
+                className={`relative px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-colors duration-200 cursor-pointer active:scale-95 ${
+                  activeCategory === cat.id ? 'text-white' : 'text-black/70 hover:text-black bg-[#F0EEED]'
                 }`}
               >
-                {cat.label}
+                {activeCategory === cat.id && (
+                  <motion.div
+                    layoutId="activeCategoryTab"
+                    className="absolute inset-0 bg-black rounded-full shadow-md z-0"
+                    transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10">{cat.label}</span>
               </button>
             ))}
           </div>
