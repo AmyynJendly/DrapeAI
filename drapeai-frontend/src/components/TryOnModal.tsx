@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { X, Upload, Camera, Sparkles, Download, RefreshCw, CheckCircle2, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Upload, Camera, Sparkles, Download, RefreshCw, CheckCircle2, ShoppingBag, ArrowRight, UserCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Product, TryOnResponse } from '../types';
-import { tryOnApi } from '../services/api';
+import { Product } from '../types';
+import { useCart } from '../context/CartContext';
+import { processHuggingFaceVTO } from '../services/hfVtoService';
 import WebcamCapture from './WebcamCapture';
 
 interface TryOnModalProps {
@@ -10,19 +11,60 @@ interface TryOnModalProps {
   onClose: () => void;
 }
 
+const PRESET_MODELS = [
+  {
+    id: 'female-model',
+    name: 'Female Model',
+    url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    id: 'male-model',
+    name: 'Male Model',
+    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    id: 'mannequin',
+    name: 'Studio Mannequin',
+    url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80',
+  },
+];
+
+const PROGRESS_LABELS = [
+  'Connecting to Hugging Face AI cluster...',
+  'Fitting garment contours to posture...',
+  'Generating high-res fabric rendering...',
+];
+
 export default function TryOnModal({ product, onClose }: TryOnModalProps) {
-  const [activeTab, setActiveTab] = useState<'upload' | 'webcam'>('upload');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { addToCart } = useCart();
+  const [activeTab, setActiveTab] = useState<'preset' | 'upload' | 'webcam'>('preset');
+  const [selectedImage, setSelectedImage] = useState<string>(PRESET_MODELS[0].url);
+  const [selectedModelId, setSelectedModelId] = useState<string>('female-model');
+
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState<number>(0);
-  const [result, setResult] = useState<TryOnResponse | null>(null);
+  const [progressStep, setProgressStep] = useState(0);
+  const [progressMessage, setProgressMessage] = useState(PROGRESS_LABELS[0]);
+  const [resultImage, setResultImage] = useState<string | null>(null);
+  const [spaceUsed, setSpaceUsed] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const processingLabels = [
-    'Analyzing pose & body geometry...',
-    'Aligning garment textures & fit...',
-    'Rendering AI neural diffusion image...',
-  ];
+  // Before/After Slider percentage state
+  const [sliderPos, setSliderPos] = useState<number>(50);
+  const [addedToCart, setAddedToCart] = useState<boolean>(false);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval>;
+    if (isProcessing) {
+      timer = setInterval(() => {
+        setProgressStep((prev) => {
+          const next = (prev + 1) % PROGRESS_LABELS.length;
+          setProgressMessage(PROGRESS_LABELS[next]);
+          return next;
+        });
+      }, 3000);
+    }
+    return () => clearInterval(timer);
+  }, [isProcessing]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -34,76 +76,74 @@ export default function TryOnModal({ product, onClose }: TryOnModalProps) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setSelectedImage(reader.result as string);
+        setSelectedModelId('custom');
         setError(null);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleProcessTryOn = async () => {
+  const handleSelectPreset = (model: typeof PRESET_MODELS[0]) => {
+    setSelectedImage(model.url);
+    setSelectedModelId(model.id);
+    setError(null);
+  };
+
+  const handleGenerateTryOn = async () => {
     if (!selectedImage) {
-      setError('Please upload a photo or capture a camera snap first.');
+      setError('Please select or upload a model photo first.');
       return;
     }
 
     setIsProcessing(true);
-    setProcessingStep(0);
+    setProgressStep(0);
+    setProgressMessage(PROGRESS_LABELS[0]);
     setError(null);
 
-    const step1 = setTimeout(() => setProcessingStep(1), 1200);
-    const step2 = setTimeout(() => setProcessingStep(2), 2400);
-
     try {
-      const response = await tryOnApi.processTryOn({
-        productId: product.id,
-        userImage: selectedImage,
-        category: product.category,
-      });
+      const res = await processHuggingFaceVTO(
+        selectedImage,
+        product.imageUrl,
+        product.category,
+        (msg) => setProgressMessage(msg)
+      );
 
-      setTimeout(() => {
-        setResult(response);
-        setIsProcessing(false);
-      }, 3600);
+      setResultImage(res.resultUrl);
+      setSpaceUsed(res.spaceUsed || 'HuggingFace IDM-VTON');
     } catch (err: any) {
-      clearTimeout(step1);
-      clearTimeout(step2);
-      setTimeout(() => {
-        setResult({
-          id: 'demo-' + Date.now(),
-          productId: product.id,
-          productName: product.name,
-          category: product.category,
-          userImageUrl: selectedImage,
-          resultImageUrl: product.category === 'footwear'
-            ? 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80'
-            : 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=800&q=80',
-          status: 'COMPLETED',
-        });
-        setIsProcessing(false);
-      }, 3600);
+      setError(err?.message || 'Failed to generate try-on preview.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleReset = () => {
-    setResult(null);
-    setSelectedImage(null);
+    setResultImage(null);
     setIsProcessing(false);
+    setError(null);
+  };
+
+  const handleAddToCart = () => {
+    addToCart(product, 1);
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2000);
   };
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto">
+      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="bg-white rounded-[32px] max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-black/10 relative my-8"
+          className="bg-[#E5DAC8] rounded-[32px] max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-black/10 relative my-8 text-black"
         >
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 rounded-full bg-[#F0EEED] hover:bg-black hover:text-white text-black transition active:scale-90"
+            className="absolute top-6 right-6 p-2.5 rounded-full bg-black/10 hover:bg-black hover:text-white text-black transition active:scale-90 cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
@@ -113,90 +153,139 @@ export default function TryOnModal({ product, onClose }: TryOnModalProps) {
             <img
               src={product.imageUrl}
               alt={product.name}
-              className="w-14 h-14 object-cover rounded-2xl bg-[#F0EEED] shadow-sm"
+              className="w-16 h-16 object-cover rounded-2xl bg-white shadow-md border border-black/5"
             />
             <div>
-              <span className="text-[10px] font-black uppercase tracking-widest bg-black text-white px-2.5 py-1 rounded-full flex items-center gap-1 w-fit">
-                <Sparkles className="w-3 h-3 text-yellow-400" /> Virtual Try-On
+              <span className="text-[10px] font-extrabold uppercase tracking-widest bg-black text-white px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
+                <Sparkles className="w-3 h-3 text-yellow-400 animate-pulse" /> Virtual Try-On
               </span>
-              <h3 className="text-xl font-black uppercase tracking-tight text-black mt-1">
+              <h3 className="text-xl font-serif-luxury font-bold uppercase tracking-tight text-black mt-1">
                 {product.name}
               </h3>
-              <p className="text-xs text-black/60 font-semibold">
-                {product.category === 'footwear'
-                  ? 'For best results, upload or snap a photo of your feet.'
-                  : 'For best results, upload or snap a full-body photo.'}
+              <p className="text-xs text-black/70 font-medium">
+                ${product.price.toFixed(0)} • {product.category.toUpperCase()}
               </p>
             </div>
           </div>
 
-          {/* Modal Content */}
-          {result ? (
-            /* Result View: Before & After Comparison */
+          {/* STEP 3: Result View with Interactive Before / After Slider */}
+          {resultImage ? (
             <div className="pt-6 space-y-6">
-              <div className="text-center">
-                <span className="inline-flex items-center gap-1 text-emerald-600 bg-emerald-50 text-xs font-bold px-3 py-1 rounded-full mb-2">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> AI Try-On Complete
+              <div className="text-center space-y-1">
+                <span className="inline-flex items-center gap-1.5 text-emerald-800 bg-emerald-100/80 text-xs font-bold px-3 py-1 rounded-full border border-emerald-300/40">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Hugging Face VTO Complete
                 </span>
-                <h4 className="text-2xl font-black uppercase text-black tracking-tight">
-                  Your AI Visualization
+                <h4 className="text-2xl font-serif-luxury font-bold text-black">
+                  Before / After AI Comparison
                 </h4>
+                {spaceUsed && (
+                  <p className="text-[11px] text-black/50 font-medium">
+                    Engine: <span className="font-bold text-black">{spaceUsed}</span>
+                  </p>
+                )}
               </div>
 
-              {/* Side-by-side Image Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-black/60 block text-center">
-                    Original Photo
+              {/* Interactive Before / After Slider */}
+              <div className="relative aspect-[4/5] max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl border-2 border-black select-none group">
+                {/* After Image (Full width background) */}
+                <img
+                  src={resultImage}
+                  alt="AI Try-On Result"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+
+                {/* Before Image (Clipped overlay) */}
+                <div
+                  className="absolute inset-0 overflow-hidden border-r-2 border-white shadow-xl"
+                  style={{ width: `${sliderPos}%` }}
+                >
+                  <img
+                    src={selectedImage}
+                    alt="Original Photo"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ width: '100%', maxWidth: 'none' }}
+                  />
+                  <span className="absolute top-3 left-3 bg-black/70 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    Original
                   </span>
-                  <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-[#F0EEED] border border-black/10">
-                    <img src={result.userImageUrl} alt="Original" className="w-full h-full object-cover" />
+                </div>
+
+                {/* Slider Handle Divider */}
+                <div
+                  className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize flex items-center justify-center shadow-2xl"
+                  style={{ left: `${sliderPos}%` }}
+                >
+                  <div className="w-8 h-8 rounded-full bg-white text-black font-extrabold text-xs shadow-xl border border-black/20 flex items-center justify-center -ml-3.5">
+                    ↔
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-black block text-center flex items-center justify-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-yellow-500" /> AI Try-On Result
-                  </span>
-                  <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-[#F0EEED] border-2 border-black shadow-xl relative group">
-                    <img src={result.resultImageUrl} alt="AI Result" className="w-full h-full object-cover" />
-                  </div>
-                </div>
+                {/* Range Slider Control */}
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={sliderPos}
+                  onChange={(e) => setSliderPos(Number(e.target.value))}
+                  className="absolute inset-0 opacity-0 cursor-ew-resize w-full h-full z-20"
+                />
+
+                <span className="absolute top-3 right-3 bg-black text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-yellow-400" /> AI Result
+                </span>
               </div>
 
-              {/* Actions */}
+              {/* Action Controls */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <a
-                  href={result.resultImageUrl}
-                  download={`drapeai-tryon-${product.id}.jpg`}
+                  href={resultImage}
+                  download={`drapeai-${product.name.toLowerCase().replace(/\s+/g, '-')}.jpg`}
                   target="_blank"
                   rel="noreferrer"
-                  className="shimmer-btn flex-1 bg-black text-white text-xs py-4 rounded-full font-bold hover:bg-black/90 flex items-center justify-center gap-2 transition shadow-lg active:scale-95 cursor-pointer"
+                  className="shimmer-btn flex-1 bg-black text-white text-xs py-3.5 px-4 rounded-full font-bold hover:bg-black/90 flex items-center justify-center gap-2 transition shadow-xl cursor-pointer active:scale-95"
                 >
-                  <Download className="w-4 h-4 text-yellow-400 animate-pulse" /> Download Result Image
+                  <Download className="w-4 h-4 text-yellow-400 animate-pulse" /> Download High-Res ⬇️
                 </a>
+
+                <button
+                  onClick={handleAddToCart}
+                  className="px-6 py-3.5 rounded-full bg-[#5A4533] text-white font-bold text-xs hover:bg-black transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-md"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  {addedToCart ? 'Added! ✓' : 'Add Item to Cart 🛒'}
+                </button>
+
                 <button
                   onClick={handleReset}
-                  className="px-6 py-4 rounded-full bg-[#F0EEED] text-black font-bold text-xs hover:bg-black/10 transition flex items-center justify-center gap-1.5 active:scale-95"
+                  className="px-5 py-3.5 rounded-full bg-white text-black font-bold text-xs hover:bg-black hover:text-white border border-black/20 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" /> Try Another Photo
+                  <RefreshCw className="w-3.5 h-3.5" /> Try Another 🔄
                 </button>
               </div>
             </div>
           ) : isProcessing ? (
-            /* Processing View */
-            <div className="py-12 flex flex-col items-center justify-center text-center space-y-6">
-              <div className="relative w-20 h-20 flex items-center justify-center">
+            /* STEP 2: Generation State with Shimmer & Live Progress Updates */
+            <div className="py-16 flex flex-col items-center justify-center text-center space-y-6">
+              <div className="relative w-24 h-24 flex items-center justify-center">
+                {/* Outer Spinning Ring */}
                 <div className="absolute inset-0 rounded-full border-4 border-black/10 border-t-black animate-spin" />
-                <Sparkles className="w-8 h-8 text-black animate-pulse" />
+                <div className="w-16 h-16 rounded-full bg-[#5A4533] flex items-center justify-center shadow-lg">
+                  <Sparkles className="w-8 h-8 text-[#D9C4A9] animate-pulse" />
+                </div>
+              </div>
+
+              {/* Shimmer Visual Container */}
+              <div className="w-full max-w-xs aspect-[4/5] rounded-3xl overflow-hidden relative bg-black/10 border border-black/10 shadow-inner">
+                <img src={selectedImage} alt="Processing Model" className="w-full h-full object-cover opacity-60 blur-[2px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
               </div>
 
               <div className="space-y-2 max-w-sm">
-                <h4 className="text-xl font-black uppercase tracking-tight text-black">
+                <h4 className="text-xl font-serif-luxury font-bold text-black uppercase tracking-tight">
                   Processing Virtual Try-On
                 </h4>
-                <p className="text-xs font-bold text-black/70 animate-pulse">
-                  {processingLabels[processingStep]}
+                <p className="text-xs font-bold text-black/80 animate-pulse bg-white/60 py-2 px-4 rounded-full border border-black/10">
+                  {progressMessage}
                 </p>
               </div>
 
@@ -204,63 +293,106 @@ export default function TryOnModal({ product, onClose }: TryOnModalProps) {
                 {[0, 1, 2].map((step) => (
                   <div
                     key={step}
-                    className={`h-1.5 rounded-full transition-all duration-500 ${
-                      processingStep >= step ? 'w-8 bg-black' : 'w-3 bg-black/20'
+                    className={`h-2 rounded-full transition-all duration-500 ${
+                      progressStep >= step ? 'w-8 bg-black' : 'w-3 bg-black/20'
                     }`}
                   />
                 ))}
               </div>
             </div>
           ) : (
-            /* Upload / Camera Selection View */
+            /* STEP 1: Upload / Model Selection View */
             <div className="pt-6 space-y-6">
               {error && (
-                <div className="p-3 rounded-xl bg-red-50 text-red-600 text-xs font-semibold">
+                <div className="p-3.5 rounded-2xl bg-red-100 border border-red-200 text-red-700 text-xs font-bold">
                   {error}
                 </div>
               )}
 
-              {/* Input Tabs */}
-              <div className="flex bg-[#F0EEED] p-1 rounded-full max-w-md mx-auto">
+              {/* Mode Tabs */}
+              <div className="flex bg-[#C5B299]/50 p-1.5 rounded-full max-w-md mx-auto border border-black/10">
+                <button
+                  onClick={() => setActiveTab('preset')}
+                  className={`flex-1 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    activeTab === 'preset' ? 'bg-black text-white shadow-md' : 'text-black/70 hover:text-black'
+                  }`}
+                >
+                  <UserCheck className="w-3.5 h-3.5" /> 3 Preset Models
+                </button>
+
                 <button
                   onClick={() => setActiveTab('upload')}
-                  className={`flex-1 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition ${
-                    activeTab === 'upload' ? 'bg-black text-white shadow-md' : 'text-black/60 hover:text-black'
+                  className={`flex-1 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    activeTab === 'upload' ? 'bg-black text-white shadow-md' : 'text-black/70 hover:text-black'
                   }`}
                 >
                   <Upload className="w-3.5 h-3.5" /> Upload Photo
                 </button>
+
                 <button
                   onClick={() => setActiveTab('webcam')}
-                  className={`flex-1 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition ${
-                    activeTab === 'webcam' ? 'bg-black text-white shadow-md' : 'text-black/60 hover:text-black'
+                  className={`flex-1 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    activeTab === 'webcam' ? 'bg-black text-white shadow-md' : 'text-black/70 hover:text-black'
                   }`}
                 >
                   <Camera className="w-3.5 h-3.5" /> Camera Snap
                 </button>
               </div>
 
-              {/* Tab Body */}
-              {activeTab === 'upload' ? (
+              {/* Tab Contents */}
+              {activeTab === 'preset' ? (
+                <div className="space-y-4">
+                  <p className="text-xs font-bold text-black/70 text-center uppercase tracking-wider">
+                    Select a Model for Instant 1-Click AI Try-On
+                  </p>
+
+                  <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
+                    {PRESET_MODELS.map((model) => {
+                      const isSelected = selectedModelId === model.id;
+                      return (
+                        <button
+                          key={model.id}
+                          onClick={() => handleSelectPreset(model)}
+                          className={`relative aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all cursor-pointer group ${
+                            isSelected ? 'border-black ring-4 ring-black/10 scale-105 shadow-xl' : 'border-transparent opacity-75 hover:opacity-100'
+                          }`}
+                        >
+                          <img src={model.url} alt={model.name} className="w-full h-full object-cover" />
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-center">
+                            <span className="text-[10px] font-bold text-white block leading-tight">
+                              {model.name}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <div className="absolute top-2 right-2 bg-black text-white p-1 rounded-full">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-yellow-400" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : activeTab === 'upload' ? (
                 <div>
-                  {selectedImage ? (
-                    <div className="relative aspect-square w-full max-w-xs mx-auto rounded-2xl overflow-hidden bg-black border border-black/10 shadow-lg">
-                      <img src={selectedImage} alt="Selected" className="w-full h-full object-cover" />
+                  {selectedImage && selectedModelId === 'custom' ? (
+                    <div className="relative aspect-[3/4] w-full max-w-xs mx-auto rounded-2xl overflow-hidden bg-black border border-black/10 shadow-lg">
+                      <img src={selectedImage} alt="Uploaded Photo" className="w-full h-full object-cover" />
                       <button
-                        onClick={() => setSelectedImage(null)}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-white hover:bg-black"
+                        onClick={() => { setSelectedImage(PRESET_MODELS[0].url); setSelectedModelId('female-model'); }}
+                        className="absolute top-3 right-3 p-2 rounded-full bg-black/80 text-white hover:bg-black cursor-pointer"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
                   ) : (
-                    <label className="border-2 border-dashed border-black/20 hover:border-black rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer bg-[#F0EEED]/50 hover:bg-[#F0EEED] transition group">
+                    <label className="border-2 border-dashed border-black/20 hover:border-black rounded-3xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer bg-white/50 hover:bg-white transition group max-w-md mx-auto">
                       <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
                         <Upload className="w-5 h-5" />
                       </div>
-                      <div className="text-center">
+                      <div className="text-center space-y-1">
                         <p className="text-sm font-bold text-black">Click or Drag Photo Here</p>
-                        <p className="text-xs text-black/50 font-medium">Supports JPEG, PNG up to 10MB</p>
+                        <p className="text-xs text-black/50 font-medium">Supports JPG, PNG up to 10MB (Base64 URL)</p>
                       </div>
                       <input
                         type="file"
@@ -272,12 +404,12 @@ export default function TryOnModal({ product, onClose }: TryOnModalProps) {
                   )}
                 </div>
               ) : (
-                <WebcamCapture onCapture={(img) => setSelectedImage(img)} />
+                <WebcamCapture onCapture={(img) => { setSelectedImage(img); setSelectedModelId('custom'); }} />
               )}
 
-              {/* Submit Button */}
+              {/* Submit CTA Button */}
               <button
-                onClick={handleProcessTryOn}
+                onClick={handleGenerateTryOn}
                 disabled={!selectedImage}
                 className="shimmer-btn w-full bg-black text-white py-4 rounded-full font-bold text-sm hover:bg-black/90 flex items-center justify-center gap-2 transition-all shadow-xl disabled:opacity-40 active:scale-95 cursor-pointer"
               >

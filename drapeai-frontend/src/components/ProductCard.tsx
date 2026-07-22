@@ -1,103 +1,76 @@
 import React from 'react';
-import { Star, Sparkles, ShoppingBag } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 
 interface ProductCardProps {
   product: Product;
   onTryOn?: (product: Product) => void;
+  index?: number;
 }
 
-export default function ProductCard({ product, onTryOn }: ProductCardProps) {
+const BACKDROP_STYLES = [
+  'bg-[#D9C4A9]/40 translate-y-6 translate-x-3',
+  'bg-[#C5B299]/30 -translate-y-4 -translate-x-3',
+  'bg-[#B5A289]/30 translate-y-4 translate-x-4',
+  'bg-[#D9C4A9]/50 -translate-y-6 translate-x-2',
+];
+
+export default function ProductCard({ product, onTryOn, index = 0 }: ProductCardProps) {
   const { addToCart } = useCart();
-  const ratingScore = 4.5;
-  const originalPrice = Math.round(product.price * 1.25);
-  const discountPercent = -20;
+  const backdropClass = BACKDROP_STYLES[index % BACKDROP_STYLES.length];
 
   const getOptimizedUrl = (url: string) => {
     if (!url) return '';
     if (url.includes('images.unsplash.com') && !url.includes('?')) {
-      return `${url}?auto=format&fit=crop&w=600&q=80`;
+      return `${url}?auto=format&fit=crop&w=800&q=80`;
     }
     return url;
   };
 
   return (
-    <div className="bg-white rounded-[28px] p-4 flex flex-col justify-between overflow-hidden shadow-xl border border-black/5 transition-all duration-300 hover:-translate-y-1.5 group">
-      {/* 1. Image Container */}
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-[#E8E6E5]">
+    <div className="product-card group relative flex flex-col gap-5 pt-6">
+      {/* Offset Parallax Background Slab */}
+      <div className={`absolute inset-0 -z-10 rounded-3xl pointer-events-none transition-transform duration-500 ${backdropClass}`} />
+
+      {/* Image Container */}
+      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-white/40 shadow-sm transition-transform duration-700 group-hover:-translate-y-2 border border-black/5">
         <img
           src={getOptimizedUrl(product.imageUrl)}
           alt={product.name}
-          className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500 ease-out"
+          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
           loading="lazy"
-          decoding="async"
         />
-        {/* Glassmorphism Category Pill matching Stitch Screen 2 */}
-        <div className="absolute top-3 left-3">
-          <span className="backdrop-blur-md bg-black/90 text-white text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
-            {product.category}
-          </span>
-        </div>
 
-        {/* Floating Cart Button */}
-        <button
-          onClick={() => addToCart(product, 1)}
-          className="absolute bottom-3 right-3 bg-white text-black p-2.5 rounded-full shadow-md hover:bg-black hover:text-white transition-colors duration-200 active:scale-90"
-          title="Add to Cart"
-        >
-          <ShoppingBag className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* 2. Product Details */}
-      <div className="mt-4 flex flex-col justify-between flex-1 space-y-2">
-        <h3 className="text-base font-bold text-black truncate">
-          {product.name}
-        </h3>
-
-        {/* Rating Stars */}
-        <div className="flex items-center gap-1.5 text-xs text-black/70 font-semibold">
-          <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className="w-3.5 h-3.5 text-[#FFC700] fill-[#FFC700]"
-              />
-            ))}
-          </div>
-          <span className="font-bold text-black text-[11px]">{ratingScore}/5</span>
-        </div>
-
-        {/* Pricing Hierarchy */}
-        <div className="flex items-center gap-2 pt-1">
-          <span className="text-xl font-black text-black">
-            ${product.price.toFixed(0)}
-          </span>
-          <span className="text-sm font-bold text-black/40 line-through">
-            ${originalPrice}
-          </span>
-          <span className="bg-[#FF3333]/10 text-[#FF3333] text-[10px] font-extrabold px-2 py-0.5 rounded-full">
-            {discountPercent}%
-          </span>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="grid grid-cols-5 gap-2 pt-1">
+        {/* Hover Action Overlay */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-5">
           <button
             onClick={() => onTryOn?.(product)}
-            className="col-span-4 shimmer-btn bg-black text-white text-xs py-3 rounded-full font-bold hover:bg-black/90 flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+            className="bg-white text-black w-full py-3.5 rounded-xl font-label-caps text-xs font-bold tracking-wider flex items-center justify-center gap-2 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500 hover:bg-black hover:text-white cursor-pointer active:scale-95 shadow-lg"
           >
-            <Sparkles className="w-3.5 h-3.5 text-yellow-400 animate-pulse" />
-            Try On with AI ✨
+            <Sparkles className="w-4 h-4 text-yellow-500 fill-yellow-500 animate-pulse" />
+            TRY ON WITH AI
           </button>
+        </div>
+      </div>
 
+      {/* Card Info */}
+      <div className="space-y-1">
+        <span className="font-label-caps text-[10px] text-black/60 tracking-[0.2em] uppercase font-bold">
+          {product.category}
+        </span>
+        <h4 className="font-serif-luxury text-xl font-bold text-black truncate">
+          {product.name}
+        </h4>
+        <div className="flex justify-between items-center pt-1">
+          <span className="font-sans font-bold text-lg text-black">
+            ${product.price.toFixed(0)}
+          </span>
           <button
             onClick={() => addToCart(product, 1)}
-            className="col-span-1 bg-[#F0EEED] hover:bg-black text-black hover:text-white border border-black/10 rounded-full flex items-center justify-center transition-all shadow-sm active:scale-90"
-            title="Add to Cart"
+            className="text-black font-label-caps text-xs font-bold hover:underline cursor-pointer tracking-wider"
           >
-            <ShoppingBag className="w-4 h-4" />
+            Add to Cart
           </button>
         </div>
       </div>

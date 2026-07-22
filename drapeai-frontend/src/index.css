@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,15 +6,31 @@
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Hanken Grotesk', sans-serif;
     background-color: #E5DAC8;
-    color: #000000;
+    color: #1a1c1c;
     overflow-x: hidden;
   }
 }
 
-.font-serif-luxury {
-  font-family: 'Playfair Display', serif;
+.font-serif-luxury,
+.font-headline-lg,
+.font-headline-md,
+.font-display-lg,
+.font-watermark {
+  font-family: 'Bodoni Moda', Georgia, serif;
+}
+
+.font-body-lg,
+.font-body-md,
+.font-label-caps {
+  font-family: 'Hanken Grotesk', sans-serif;
+}
+
+.font-label-caps {
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 /* Custom CSS Keyframe Animations */
@@ -72,41 +88,19 @@
   animation: shimmer 1.5s infinite;
 }
 
-/* Smooth Gradient Edge Masking */
-.mask-gradient-edges {
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 12%,
-    black 88%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 12%,
-    black 88%,
-    transparent 100%
-  );
+/* Watermark Text Styling */
+.watermark-text {
+  user-select: none;
+  pointer-events: none;
+  color: #C5B299;
+  opacity: 0.25;
+  z-index: 0;
 }
 
-/* Navigation Link Underline Effect */
-.nav-link-hover {
-  position: relative;
-}
-
-.nav-link-hover::after {
-  content: '';
-  position: absolute;
-  width: 0%;
-  height: 2px;
-  bottom: -4px;
-  left: 50%;
-  background-color: #000000;
-  transition: all 0.3s ease-in-out;
-  transform: translateX(-50%);
-}
-
-.nav-link-hover:hover::after {
-  width: 100%;
+/* Glass Card Styling */
+.glass-card {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 0.5px solid rgba(255, 255, 255, 0.4);
 }

@@ -4,42 +4,38 @@ interface BrandBarProps {
   variant?: 'tan' | 'black';
 }
 
-export default function BrandBar({ variant = 'black' }: BrandBarProps) {
+export default function BrandBar({ variant = 'tan' }: BrandBarProps) {
   const brands = [
     'ZARA',
+    'DOLCE & GABBANA',
     'GUCCI',
     'VERSACE',
     'BALENCIAGA',
     'PRADA',
-    'DIOR',
-    'FENDI',
     'SAINT LAURENT',
-    'HERMÈS',
   ];
 
   const marqueeItems = [...brands, ...brands, ...brands, ...brands];
 
   const bgClasses = variant === 'tan'
-    ? 'bg-[#C5B299] text-black border-y border-black/10'
-    : 'bg-[#111111] text-white py-5 shadow-inner';
+    ? 'bg-[#D9C4A9] text-black border-y border-black/10 py-10'
+    : 'bg-[#111111] text-white py-10 border-y border-white/10';
 
   return (
     <section id="brands" className={`${bgClasses} overflow-hidden relative z-10 select-none`}>
-      <div className="w-full overflow-hidden">
-        <div className="animate-marquee flex items-center gap-12 sm:gap-16 whitespace-nowrap">
+      <div className="marquee">
+        <div className="animate-marquee flex items-center gap-16 whitespace-nowrap">
           {marqueeItems.map((brand, index) => (
             <div
               key={`${brand}-${index}`}
-              className="flex items-center gap-12 sm:gap-16 flex-shrink-0"
+              className="flex items-center gap-16 flex-shrink-0"
             >
-              <span className={`text-xl sm:text-2xl font-black uppercase tracking-[0.25em] font-serif-luxury cursor-pointer transition-opacity ${
-                variant === 'tan' ? 'text-black opacity-90 hover:opacity-100' : 'text-white/90 hover:text-white'
+              <span className={`font-serif-luxury text-2xl sm:text-4xl font-normal tracking-[0.2em] uppercase ${
+                variant === 'tan' ? 'text-black' : 'text-white'
               }`}>
                 {brand}
               </span>
-              <span className={`text-xs ${variant === 'tan' ? 'text-black/40' : 'text-white/30'}`}>
-                •
-              </span>
+              <span className={`w-2.5 h-2.5 rounded-full ${variant === 'tan' ? 'bg-black/20' : 'bg-white/20'}`} />
             </div>
           ))}
         </div>
