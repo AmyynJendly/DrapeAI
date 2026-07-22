@@ -77,8 +77,8 @@ jobs:
           file: ./drapeai-backend/Dockerfile
           push: ${{ env.DOCKERHUB_USERNAME != '' && github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_USERNAME || 'drapeai' }}/drapeai-backend:latest
-            ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_USERNAME || 'drapeai' }}/drapeai-backend:${{ github.sha }}
+            amyynjendly/drapeai-backend:latest
+            amyynjendly/drapeai-backend:${{ github.sha }}
 
       - name: Build & Push Frontend Image
         uses: docker/build-push-action@v5
@@ -87,5 +87,5 @@ jobs:
           file: ./drapeai-frontend/Dockerfile
           push: ${{ env.DOCKERHUB_USERNAME != '' && github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_USERNAME || 'drapeai' }}/drapeai-frontend:latest
-            ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_USERNAME || 'drapeai' }}/drapeai-frontend:${{ github.sha }}
+            amyynjendly/drapeai-frontend:latest
+            amyynjendly/drapeai-frontend:${{ github.sha }}
