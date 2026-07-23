@@ -1,0 +1,52 @@
+services:
+  mongodb:
+    image: mongo:7.0-alpine
+    container_name: drapeai-mongodb-dev
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-data-dev:/data/db
+    networks:
+      - drapeai-network-dev
+
+  backend:
+    image: drapeai-backend-dev
+    container_name: drapeai-backend-dev
+    build:
+      context: ./drapeai-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./drapeai-backend/src:/app/src
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:password@mongodb:27017/drapeai?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - drapeai-network-dev
+
+  frontend:
+    image: drapeai-frontend-dev
+    container_name: drapeai-frontend-dev
+    build:
+      context: ./drapeai-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    volumes:
+      - ./drapeai-frontend/src:/app/src
+    depends_on:
+      - backend
+    networks:
+      - drapeai-network-dev
+
+volumes:
+  mongo-data-dev:
+
+networks:
+  drapeai-network-dev:
+    driver: bridge
