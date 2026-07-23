@@ -1,6 +1,6 @@
 services:
   mongodb:
-    image: mongo:7.0-alpine
+    image: mongo:latest
     container_name: drapeai-mongodb
     ports:
       - "27017:27017"
