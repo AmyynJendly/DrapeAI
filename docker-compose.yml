@@ -1,16 +1,24 @@
 services:
   mongodb:
-    image: mongo:latest
+    image: mongo:7.0-alpine
     container_name: drapeai-mongodb
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
       - mongo-data:/data/db
     networks:
       - drapeai-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
-    image: amyynjendly/drapeai-backend:latest
+    image: amyynjendly/drapeai-backend:1.0.0
     build:
       context: ./drapeai-backend
       dockerfile: Dockerfile
@@ -18,14 +26,20 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/drapeai
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:password@mongodb:27017/drapeai?authSource=admin
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
       - drapeai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
-    image: amyynjendly/drapeai-frontend:latest
+    image: amyynjendly/drapeai-frontend:1.0.0
     build:
       context: ./drapeai-frontend
       dockerfile: Dockerfile
@@ -33,9 +47,15 @@ services:
     ports:
       - "5173:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - drapeai-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mongo-data:

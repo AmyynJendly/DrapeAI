@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Product, TryOnRequest, TryOnResponse } from '../types';
 import { AuthResponse, LoginRequest, RegisterRequest } from '../types/auth';
 import { CreateOrderRequestPayload, OrderResponsePayload } from '../types/order';
@@ -12,14 +12,56 @@ export const apiClient = axios.create({
   },
 });
 
+// Retry interceptor - retries failed requests up to 3 times
+const retryConfig = {
+  maxRetries: 3,
+  retryDelay: 1000,
+  retryableStatusCodes: [408, 429, 500, 502, 503, 504],
+};
+
 // Interceptor to attach JWT token to headers if present
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('drapeai_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // Initialize retry count
+  if (!config.headers['X-Retry-Count']) {
+    config.headers['X-Retry-Count'] = '0';
+  }
   return config;
 });
+
+// Response interceptor with retry logic
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const config = error.config as any;
+    if (!config) return Promise.reject(error);
+
+    const retryCount = parseInt(config.headers['X-Retry-Count'] || '0');
+
+    // Check if we should retry
+    const shouldRetry =
+      retryCount < retryConfig.maxRetries &&
+      (retryableStatusCodes.includes(error.response?.status || 0) ||
+        !error.response); // Retry on network errors too
+
+    if (shouldRetry) {
+      config.headers['X-Retry-Count'] = (retryCount + 1).toString();
+      
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = retryConfig.retryDelay * Math.pow(2, retryCount);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      
+      return apiClient(config);
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+const retryableStatusCodes = retryConfig.retryableStatusCodes;
 
 export const authApi = {
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
