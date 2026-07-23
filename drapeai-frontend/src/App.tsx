@@ -6,6 +6,7 @@ import { productApi } from './services/api';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { curatedCatalog } from './data/catalog';
 import TopBanner from './components/TopBanner';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
@@ -14,47 +15,16 @@ import ProductCard from './components/ProductCard';
 import QuoteSection from './components/QuoteSection';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
+import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
 import AdminPage from './pages/AdminPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import AccountPage from './pages/AccountPage';
+import SettingsPage from './pages/SettingsPage';
 import TryOnModal from './components/TryOnModal';
-
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: '1',
-    name: 'Asymmetric Blazer',
-    description: 'A minimalist black asymmetric blazer with sharp tailoring and single sculptural button.',
-    category: 'apparel',
-    price: 450.00,
-    imageUrl: 'https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: '2',
-    name: 'Silk Flow Trousers',
-    description: 'Wide-leg ivory silk trousers crafted with fluid motion and premium silk.',
-    category: 'apparel',
-    price: 320.00,
-    imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: '3',
-    name: 'Organza Volume Top',
-    description: 'Sheer silk organza blouse featuring dramatic voluminous sleeves.',
-    category: 'apparel',
-    price: 280.00,
-    imageUrl: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: '4',
-    name: 'Sculptural Leather Boot',
-    description: 'Handcrafted black leather pointed-toe boots with a sculptural metallic heel.',
-    category: 'footwear',
-    price: 595.00,
-    imageUrl: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80',
-  },
-];
 
 function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -72,13 +42,16 @@ function HomePage() {
       if (data && data.length > 0) {
         setProducts(data);
       } else {
-        setProducts(MOCK_PRODUCTS);
+        const fallback = activeCategory === 'all'
+          ? curatedCatalog
+          : curatedCatalog.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
+        setProducts(fallback);
       }
     } catch (err: any) {
       setError('Backend offline — showing catalog preview.');
       const filtered = activeCategory === 'all'
-        ? MOCK_PRODUCTS
-        : MOCK_PRODUCTS.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
+        ? curatedCatalog
+        : curatedCatalog.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
       setProducts(filtered);
     } finally {
       setLoading(false);
@@ -194,11 +167,14 @@ export default function App() {
             <CartDrawer />
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/products/:productId" element={<ProductDetailPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/orders" element={<OrdersPage />} />
-              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+              <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             </Routes>
           </BrowserRouter>
         </CartProvider>

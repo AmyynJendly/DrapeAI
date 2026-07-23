@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { Product, TryOnRequest, TryOnResponse } from '../types';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../types/auth';
+import { AuthResponse, LoginRequest, RegisterRequest, UpdateAccountRequest, UserInfo } from '../types/auth';
 import { CreateOrderRequestPayload, OrderResponsePayload } from '../types/order';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -70,6 +70,17 @@ export const authApi = {
   },
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/auth/register', data);
+    return response.data;
+  },
+};
+
+export const accountApi = {
+  getMe: async (): Promise<UserInfo> => {
+    const response = await apiClient.get<UserInfo>('/account/me');
+    return response.data;
+  },
+  updateMe: async (data: UpdateAccountRequest): Promise<UserInfo> => {
+    const response = await apiClient.put<UserInfo>('/account/me', data);
     return response.data;
   },
 };
