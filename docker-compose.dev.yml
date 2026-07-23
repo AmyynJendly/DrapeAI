@@ -1,9 +1,7 @@
 services:
   mongodb:
-    image: mongo:7.0-alpine
+    image: mongo:latest
     container_name: drapeai-mongodb-dev
-    ports:
-      - "27017:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=password
