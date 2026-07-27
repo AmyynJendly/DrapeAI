@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UserInfo, LoginRequest, RegisterRequest } from '../types/auth';
-import { authApi } from '../services/api';
+import { accountApi, authApi } from '../services/api';
 
 interface AuthContextType {
   user: UserInfo | null;
@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,16 +23,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const savedToken = localStorage.getItem('drapeai_token');
     const savedUser = localStorage.getItem('drapeai_user');
-    if (savedToken && savedUser) {
-      try {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        localStorage.removeItem('drapeai_token');
-        localStorage.removeItem('drapeai_user');
+    const bootstrapAuth = async () => {
+      if (savedToken && savedUser) {
+        try {
+          setToken(savedToken);
+          setUser(JSON.parse(savedUser));
+          const profile = await accountApi.getMe();
+          setUser(profile);
+          localStorage.setItem('drapeai_user', JSON.stringify(profile));
+        } catch (e) {
+          localStorage.removeItem('drapeai_token');
+          localStorage.removeItem('drapeai_user');
+          setToken(null);
+          setUser(null);
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    bootstrapAuth();
   }, []);
 
   const login = async (credentials: LoginRequest) => {
@@ -52,6 +62,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('drapeai_user', JSON.stringify(userInfo));
   };
 
+  const refreshUser = async () => {
+    const profile = await accountApi.getMe();
+    setUser(profile);
+    localStorage.setItem('drapeai_user', JSON.stringify(profile));
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -69,6 +85,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         register,
         logout,
+        refreshUser,
       }}
     >
       {children}

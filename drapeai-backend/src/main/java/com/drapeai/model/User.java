@@ -22,6 +22,14 @@ public class User {
 
     private String password;
 
+    private String phone;
+
+    private String preferredSize;
+
+    private String stylePreference;
+
+    private Boolean newsletterOptIn;
+
     @Builder.Default
     private Role role = Role.USER;
 

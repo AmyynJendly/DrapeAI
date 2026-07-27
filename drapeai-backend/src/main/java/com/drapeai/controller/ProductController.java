@@ -40,11 +40,39 @@ public class ProductController {
     public ResponseEntity<Product> updateProduct(@PathVariable String id, @RequestBody Product product) {
         return productRepository.findById(id)
                 .map(existing -> {
-                    existing.setName(product.getName());
-                    existing.setDescription(product.getDescription());
-                    existing.setCategory(product.getCategory());
-                    existing.setPrice(product.getPrice());
-                    existing.setImageUrl(product.getImageUrl());
+                    if (product.getBrand() != null) {
+                        existing.setBrand(product.getBrand());
+                    }
+                    if (product.getName() != null) {
+                        existing.setName(product.getName());
+                    }
+                    if (product.getSlug() != null) {
+                        existing.setSlug(product.getSlug());
+                    }
+                    if (product.getDescription() != null) {
+                        existing.setDescription(product.getDescription());
+                    }
+                    if (product.getCategory() != null) {
+                        existing.setCategory(product.getCategory());
+                    }
+                    if (product.getPrice() != null) {
+                        existing.setPrice(product.getPrice());
+                    }
+                    if (product.getImageUrl() != null) {
+                        existing.setImageUrl(product.getImageUrl());
+                    }
+                    if (product.getFit() != null) {
+                        existing.setFit(product.getFit());
+                    }
+                    if (product.getMaterials() != null) {
+                        existing.setMaterials(product.getMaterials());
+                    }
+                    if (product.getCareInstructions() != null) {
+                        existing.setCareInstructions(product.getCareInstructions());
+                    }
+                    if (product.getHighlights() != null) {
+                        existing.setHighlights(product.getHighlights());
+                    }
                     return ResponseEntity.ok(productRepository.save(existing));
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
