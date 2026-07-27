@@ -1,88 +1,118 @@
-import { Client, handle_file } from '@gradio/client';
+/**
+ * Virtual Try-On service — routes all AI processing through the DrapeAI backend.
+ *
+ * The backend implements a 3-tier pipeline:
+ *   1. Colab/ngrok endpoint (if configured)
+ *   2. HF Gradio (Nymbo/Virtual-Try-On)
+ *   3. Graceful fallback (garment image)
+ *
+ * This avoids all CORS issues and keeps the HF token secure on the server.
+ */
 
-export interface VtoRequest {
-  userImageUrl: string;
-  garmentImageUrl: string;
-  category?: string;
-}
+import { apiClient } from './api';
+import { TryOnRequest, TryOnResponse } from '../types';
 
 export interface VtoResponse {
   success: boolean;
   resultUrl: string;
+  productName?: string;
   spaceUsed?: string;
 }
 
-const HF_SPACES = [
-  'Nymbo/Virtual-Try-On',
-  'yisol/IDM-VTON',
-  'jjlealse/IDM-VTON',
-];
-
 /**
- * Converts a Base64 Data URL or Blob URL into a File object for Gradio client
+ * Converts a file or blob URL / base64 data URL to a base64 data URL string.
+ * Returns the input unchanged if it's already a data URL.
  */
-async function urlToFile(url: string, filename: string): Promise<File> {
-  const res = await fetch(url);
-  const blob = await res.blob();
-  return new File([blob], filename, { type: blob.type || 'image/jpeg' });
+async function toBase64DataUrl(imageSource: string): Promise<string> {
+  // Already a base64 data URL
+  if (imageSource.startsWith('data:')) {
+    return imageSource;
+  }
+
+  // Fetch the image (works for blob:// URLs from webcam and http:// URLs from presets)
+  const response = await fetch(imageSource);
+  const blob = await response.blob();
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 /**
- * Process Virtual Try-On using Hugging Face IDM-VTON spaces via Gradio Client
+ * Submits a virtual try-on request to the backend API.
+ *
+ * @param userImageSource - Base64 data URL, blob URL, or Unsplash URL of the person photo
+ * @param garmentImageUrl - URL of the product/garment image
+ * @param productId       - Product ID to look up from the backend
+ * @param category        - Product category ("apparel" | "footwear")
+ * @param onProgress      - Optional progress callback for UI updates
  */
 export async function processHuggingFaceVTO(
-  userImageUrl: string,
+  userImageSource: string,
   garmentImageUrl: string,
-  category: string = 'clothing item',
-  onProgress?: (msg: string) => void
+  category: string,
+  onProgress?: (msg: string) => void,
+  productId?: string
 ): Promise<VtoResponse> {
-  const hfToken = import.meta.env.VITE_HF_TOKEN || '';
-  let lastError: string | null = null;
+  onProgress?.('Preparing your photo for AI processing...');
 
-  for (const spaceName of HF_SPACES) {
-    try {
-      onProgress?.(`Connecting to Hugging Face AI space: ${spaceName}...`);
-      console.log(`Connecting to Hugging Face space: ${spaceName}`);
-
-      const userFile = await urlToFile(userImageUrl, 'user_photo.jpg');
-      const garmentFile = await urlToFile(garmentImageUrl, 'garment_photo.jpg');
-
-      const app = await Client.connect(spaceName, {
-        headers: hfToken ? { Authorization: `Bearer ${hfToken}` } : {},
-      } as any);
-
-      onProgress?.(`Fitting ${category} contours to posture on ${spaceName}...`);
-
-      const predictResult: any = await app.predict('/tryon', [
-        { background: handle_file(userFile), layers: [], composite: null },
-        handle_file(garmentFile),
-        category || 'clothing item',
-        true,  // Auto crop
-        false, // Auto mask
-        30,    // Denoising steps
-        42,    // Seed
-      ]);
-
-      const outputImage = predictResult?.data?.[0]?.url || predictResult?.data?.[0];
-
-      if (outputImage) {
-        return {
-          success: true,
-          resultUrl: typeof outputImage === 'string' ? outputImage : URL.createObjectURL(outputImage),
-          spaceUsed: spaceName,
-        };
-      }
-    } catch (err: any) {
-      console.warn(`Space ${spaceName} busy or offline:`, err?.message || err);
-      lastError = err?.message || 'Space queue full';
-    }
+  // Convert user image to base64 (handles preset URLs, blob URLs, and file uploads)
+  let userImageBase64: string;
+  try {
+    userImageBase64 = await toBase64DataUrl(userImageSource);
+    onProgress?.('Connecting to DrapeAI AI engine...');
+  } catch (err) {
+    console.error('Failed to encode user image:', err);
+    // If we can't fetch the image (e.g. CORS on unsplash), pass the URL directly
+    // The backend will handle it
+    userImageBase64 = userImageSource;
+    onProgress?.('Connecting to DrapeAI AI engine...');
   }
 
-  // Fallback: High-res AI result rendering
-  console.log('HF Spaces queue busy, using high-res AI neural renderer fallback.');
-  return {
-    success: true,
-    resultUrl: garmentImageUrl,
-    spaceUsed: 'DrapeAI-Neural-Engine',
+  const request: TryOnRequest = {
+    productId: productId || 'unknown',
+    userImage: userImageBase64,
+    category: category,
   };
+
+  onProgress?.('AI is fitting the garment to your photo...');
+
+  try {
+    const response = await apiClient.post<TryOnResponse>(
+      '/try-on/process',
+      request,
+      {
+        timeout: 180_000, // 3 minutes — allow for HF Gradio queue wait
+      }
+    );
+
+    const data = response.data;
+
+    if (!data || !data.resultImageUrl) {
+      throw new Error('Backend returned an empty result.');
+    }
+
+    onProgress?.('Rendering final high-resolution result...');
+
+    return {
+      success: true,
+      resultUrl: data.resultImageUrl,
+      productName: data.productName,
+      spaceUsed: 'DrapeAI Neural Engine',
+    };
+  } catch (err: any) {
+    console.error('VTO API call failed:', err);
+
+    // Surface a friendly error message
+    const msg =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      'Failed to generate virtual try-on preview.';
+
+    throw new Error(msg);
+  }
 }

@@ -17,18 +17,27 @@ public class TryOnController {
 
     private final TryOnService tryOnService;
 
+    /**
+     * Processes a virtual try-on request.
+     * Authentication is optional — authenticated users get their history saved under their email.
+     */
     @PostMapping("/process")
     public ResponseEntity<TryOnResponse> processTryOn(
             @RequestBody TryOnRequest request,
             Authentication authentication
     ) {
-        String userEmail = authentication != null ? authentication.getName() : "guest@drapeai.com";
+        String userEmail = (authentication != null && authentication.isAuthenticated())
+                ? authentication.getName()
+                : "guest@drapeai.com";
         return ResponseEntity.ok(tryOnService.processTryOn(userEmail, request));
     }
 
+    /**
+     * Returns the authenticated user's try-on history (most recent first).
+     */
     @GetMapping("/history")
     public ResponseEntity<List<TryOnResponse>> getHistory(Authentication authentication) {
-        if (authentication == null) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.ok(List.of());
         }
         return ResponseEntity.ok(tryOnService.getUserHistory(authentication.getName()));
