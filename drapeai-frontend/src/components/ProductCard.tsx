@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
+import TryOnModal from './TryOnModal';
 
 interface ProductCardProps {
   product: Product;
@@ -17,6 +19,7 @@ const BACKDROP_STYLES = [
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { addToCart } = useCart();
+  const [showTryOn, setShowTryOn] = useState(false);
   const backdropClass = BACKDROP_STYLES[index % BACKDROP_STYLES.length];
 
   const getOptimizedUrl = (url: string) => {
@@ -46,15 +49,23 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* Hover Action Overlay */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-5">
           <div className="space-y-2 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+            <button
+              onClick={() => setShowTryOn(true)}
+              className="bg-black text-white w-full py-3 rounded-xl font-label-caps text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-black/80 cursor-pointer active:scale-95 shadow-lg"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-yellow-400" /> Virtual Try-On
+            </button>
             <Link
               to={`/products/${product.id}`}
-              className="bg-white text-black w-full py-3.5 rounded-xl font-label-caps text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-black hover:text-white cursor-pointer active:scale-95 shadow-lg"
+              className="bg-white/90 text-black w-full py-2.5 rounded-xl font-label-caps text-[11px] font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-white cursor-pointer active:scale-95 shadow-lg"
             >
               View Details
             </Link>
           </div>
         </div>
       </div>
+
+      {showTryOn && <TryOnModal product={product} onClose={() => setShowTryOn(false)} />}
 
       {/* Card Info */}
       <div className="space-y-1">
