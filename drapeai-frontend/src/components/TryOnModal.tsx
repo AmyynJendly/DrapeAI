@@ -64,7 +64,8 @@ export default function TryOnModal({ product, onClose }: TryOnModalProps) {
       }
     } catch (err: any) {
       console.error('Try-On API error:', err);
-      setError(err?.response?.data?.error || err?.message || 'Failed to process virtual try-on.');
+      const errMsg = err?.response?.data?.message || err?.response?.data?.error || err?.message || 'Failed to process virtual try-on.';
+      setError(errMsg);
     } finally {
       setIsProcessing(false);
     }

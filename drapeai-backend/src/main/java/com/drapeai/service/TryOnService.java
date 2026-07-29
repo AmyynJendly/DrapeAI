@@ -27,8 +27,8 @@ public class TryOnService {
     private final TryOnHistoryRepository tryOnHistoryRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${gemini.api.key:${GEMINI_API_KEY:}}")
-    private String geminiApiKey;
+    @Value("${hf.api.token:}")
+    private String hfApiToken;
 
     public TryOnResponse processTryOn(String userEmail, TryOnRequest request) {
         String targetGarmentId = request.getGarmentId() != null ? request.getGarmentId() : request.getProductId();
@@ -46,17 +46,21 @@ public class TryOnService {
         Product garment = productRepository.findById(targetGarmentId)
                 .orElseThrow(() -> new RuntimeException("Garment not found with ID: " + targetGarmentId));
 
-        // Read API key from .env.local if not present in env vars
-        String apiKey = getEffectiveApiKey();
+        String hfToken = getEffectiveHfToken();
 
-        String resultImage = null;
-        if (apiKey != null && !apiKey.isBlank()) {
-            resultImage = invokeGeminiApi(apiKey, userPhoto, garment.getImageUrl(), garment.getCategory());
+        if (hfToken == null || hfToken.isBlank()) {
+            throw new IllegalStateException(
+                "HuggingFace API token is missing. Please add HF_API_TOKEN=hf_xxx to your .env.local file and restart the backend.");
         }
 
-        // Fallback to garment image if AI result is empty
+        String garmentImageBase64 = fetchOrCleanBase64(garment.getImageUrl());
+        String userImageBase64 = cleanBase64(userPhoto);
+
+        String resultImage = invokeIdmVton(hfToken, userImageBase64, garmentImageBase64);
+
         if (resultImage == null || resultImage.isBlank()) {
-            resultImage = garment.getImageUrl();
+            throw new IllegalStateException(
+                "IDM-VTON AI model did not return a result. The HuggingFace Space may be overloaded or sleeping — please try again in 30 seconds.");
         }
 
         TryOnHistory history = TryOnHistory.builder()
@@ -66,7 +70,7 @@ public class TryOnService {
                 .userPhotoBase64(userPhoto.length() > 100 ? userPhoto.substring(0, 100) + "..." : userPhoto)
                 .resultImage(resultImage)
                 .status("COMPLETED")
-                .modelUsed("gemini-2.5-flash-image")
+                .modelUsed("IDM-VTON (HuggingFace)")
                 .createdAt(Instant.now())
                 .build();
 
@@ -85,115 +89,217 @@ public class TryOnService {
                 .build();
     }
 
-    private String getEffectiveApiKey() {
-        if (geminiApiKey != null && !geminiApiKey.isBlank()) {
-            return geminiApiKey;
-        }
-        // Fallback: read directly from .env.local
-        try {
-            File envFile = new File("../.env.local");
-            if (!envFile.exists()) {
-                envFile = new File(".env.local");
-            }
-            if (envFile.exists()) {
-                List<String> lines = Files.readAllLines(envFile.toPath());
-                for (String line : lines) {
-                    if (line.startsWith("GEMINI_API_KEY=")) {
-                        return line.substring("GEMINI_API_KEY=".length()).trim();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Could not read .env.local: {}", e.getMessage());
-        }
-        return null;
-    }
-
+    /**
+     * Calls the IDM-VTON HuggingFace Space via Gradio REST API (two-step: submit → poll result).
+     */
     @SuppressWarnings("unchecked")
-    private String invokeGeminiApi(String apiKey, String userPhotoBase64, String garmentImageUrl, String category) {
+    private String invokeIdmVton(String hfToken, String userBase64, String garmentBase64) {
         try {
-            log.info("🤖 Invoking Google Gemini REST API (gemini-2.5-flash-image)...");
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=" + apiKey;
+            log.info("🤖 Invoking IDM-VTON via HuggingFace Gradio API...");
 
-            String userBase64Clean = fetchOrCleanBase64(userPhotoBase64);
-            String garmentBase64Clean = fetchOrCleanBase64(garmentImageUrl);
+            String submitUrl = "https://yisol-idm-vton.hf.space/call/tryon";
 
-            Map<String, Object> userPart = Map.of(
-                    "inline_data", Map.of(
-                            "mime_type", "image/jpeg",
-                            "data", userBase64Clean
-                    )
-            );
+            // Gradio v4 payload: images passed as data URL strings
+            // Input 0: ImageEditor dict { background: dataUrl, layers: [], composite: null }
+            // Input 1: Garment image data URL string
+            // Input 2: Garment description (string)
+            // Input 3: Auto-mask (bool)
+            // Input 4: Auto-crop & paste back (bool)
+            // Input 5: Denoising steps (int)
+            // Input 6: Seed (int)
+            Map<String, Object> humanImgDict = new HashMap<>();
+            humanImgDict.put("background", "data:image/jpeg;base64," + userBase64);
+            humanImgDict.put("layers", List.of());
+            humanImgDict.put("composite", null);
 
-            Map<String, Object> garmentPart = Map.of(
-                    "inline_data", Map.of(
-                            "mime_type", "image/jpeg",
-                            "data", garmentBase64Clean
-                    )
-            );
+            List<Object> inputs = new ArrayList<>();
+            inputs.add(humanImgDict);
+            inputs.add("data:image/jpeg;base64," + garmentBase64);
+            inputs.add("luxury fashion garment");
+            inputs.add(true);
+            inputs.add(true);
+            inputs.add(30);
+            inputs.add(42);
 
-            Map<String, Object> textPart = Map.of(
-                    "text", "TASK: Virtual Clothing Try-On. Replace the existing clothing of the target person in the first image with the exact garment in the second image. Keep the person's face, skin tone, hair, posture, and background 100% identical. Preserve exact fabric details, colors, and textures."
-            );
-
-            Map<String, Object> requestBody = Map.of(
-                    "contents", List.of(
-                            Map.of("parts", List.of(userPart, garmentPart, textPart))
-                    )
-            );
+            Map<String, Object> submitBody = new HashMap<>();
+            submitBody.put("data", inputs);
+            submitBody.put("fn_index", 0);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            if (hfToken != null && !hfToken.isBlank()) {
+                headers.setBearerAuth(hfToken);
+            }
 
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+            // Step 1: Submit job and get event_id
+            HttpEntity<Map<String, Object>> submitEntity = new HttpEntity<>(submitBody, headers);
+            ResponseEntity<Map> submitResponse;
+            try {
+                submitResponse = restTemplate.postForEntity(submitUrl, submitEntity, Map.class);
+            } catch (Exception submitEx) {
+                log.warn("⚠️ IDM-VTON submit request failed: {} - {}", submitEx.getClass().getSimpleName(), submitEx.getMessage());
+                return null;
+            }
 
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                List<Map> candidates = (List<Map>) response.getBody().get("candidates");
-                if (candidates != null && !candidates.isEmpty()) {
-                    Map content = (Map) candidates.get(0).get("content");
-                    if (content != null) {
-                        List<Map> parts = (List<Map>) content.get("parts");
-                        if (parts != null) {
-                            for (Map part : parts) {
-                                Map inlineData = (Map) part.get("inline_data");
-                                if (inlineData != null && inlineData.containsKey("data")) {
-                                    String mime = (String) inlineData.getOrDefault("mime_type", "image/png");
-                                    String data = (String) inlineData.get("data");
-                                    log.info("✨ Received image output from Google Gemini!");
-                                    return "data:" + mime + ";base64," + data;
-                                }
+            if (submitResponse.getBody() == null || !submitResponse.getStatusCode().is2xxSuccessful()) {
+                log.warn("IDM-VTON submit returned non-200 status: {}", submitResponse.getStatusCode());
+                return null;
+            }
+
+            String eventId = (String) submitResponse.getBody().get("event_id");
+            if (eventId == null) {
+                log.warn("IDM-VTON: No event_id in submit response. Body: {}", submitResponse.getBody());
+                return null;
+            }
+
+            log.info("IDM-VTON job submitted. Event ID: {}. Polling for result...", eventId);
+
+            // Step 2: Poll for result (max 90 seconds, every 3 seconds)
+            String resultUrl = "https://yisol-idm-vton.hf.space/call/tryon/" + eventId;
+            HttpEntity<Void> pollEntity = new HttpEntity<>(headers);
+
+            for (int attempt = 0; attempt < 30; attempt++) {
+                Thread.sleep(3000);
+                try {
+                    ResponseEntity<String> pollResponse = restTemplate.exchange(
+                        resultUrl, HttpMethod.GET, pollEntity, String.class);
+
+                    String body = pollResponse.getBody();
+                    if (body != null && body.contains("\"data\"")) {
+                        // Parse SSE or JSON response - extract image URL or base64
+                        String resultImageUrl = extractImageFromGradioResponse(body);
+                        if (resultImageUrl != null) {
+                            log.info("✨ IDM-VTON result received after {} poll attempts!", attempt + 1);
+                            // If it's a relative gradio URL, prepend the base
+                            if (resultImageUrl.startsWith("/")) {
+                                resultImageUrl = "https://yisol-idm-vton.hf.space" + resultImageUrl;
+                            }
+                            // Convert to base64 data URL for frontend
+                            byte[] imgBytes = restTemplate.getForObject(resultImageUrl, byte[].class);
+                            if (imgBytes != null && imgBytes.length > 0) {
+                                return "data:image/png;base64," + Base64.getEncoder().encodeToString(imgBytes);
                             }
                         }
+                        if (body.contains("\"error\"")) {
+                            log.warn("IDM-VTON error in response: {}", body.substring(0, Math.min(300, body.length())));
+                            break;
+                        }
                     }
+                } catch (Exception pollEx) {
+                    log.debug("IDM-VTON poll attempt {}: {} - {}", attempt + 1, pollEx.getClass().getSimpleName(), pollEx.getMessage());
                 }
             }
+
+            log.warn("IDM-VTON: Timed out waiting for result after 90 seconds.");
         } catch (Exception e) {
-            log.warn("⚠️ Gemini API call warning: {}. Using fallback garment preview.", e.getMessage());
+            log.warn("⚠️ IDM-VTON API error: {} - {}", e.getClass().getSimpleName(), e.getMessage(), e);
         }
         return null;
     }
 
+
+    /**
+     * Extracts the image URL or path from a Gradio SSE/JSON response body.
+     */
+    private String extractImageFromGradioResponse(String body) {
+        try {
+            // SSE data line looks like: data: [{"path": "/tmp/xxx.png", ...}, ...]
+            // or data: [{"url": "https://...", ...}, ...]
+            int dataIdx = body.lastIndexOf("data: [");
+            if (dataIdx >= 0) {
+                String jsonPart = body.substring(dataIdx + 6).trim();
+                // Extract url field
+                int urlIdx = jsonPart.indexOf("\"url\":\"");
+                if (urlIdx >= 0) {
+                    int start = urlIdx + 7;
+                    int end = jsonPart.indexOf("\"", start);
+                    if (end > start) return jsonPart.substring(start, end);
+                }
+                // Extract path field as fallback
+                int pathIdx = jsonPart.indexOf("\"path\":\"");
+                if (pathIdx >= 0) {
+                    int start = pathIdx + 8;
+                    int end = jsonPart.indexOf("\"", start);
+                    if (end > start) return jsonPart.substring(start, end);
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not parse Gradio response: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Reads the HuggingFace token from @Value injection or fallback .env.local file.
+     */
+    private String getEffectiveHfToken() {
+        if (hfApiToken != null && !hfApiToken.isBlank()) {
+            return hfApiToken;
+        }
+        try {
+            File envFile = new File("../.env.local");
+            if (!envFile.exists()) envFile = new File(".env.local");
+            if (envFile.exists()) {
+                List<String> lines = Files.readAllLines(envFile.toPath());
+                for (String line : lines) {
+                    if (line.startsWith("HF_API_TOKEN=")) {
+                        return line.substring("HF_API_TOKEN=".length()).trim();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not read .env.local for HF_API_TOKEN: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Strips data URL prefix from a base64 string if present.
+     */
+    private String cleanBase64(String input) {
+        if (input == null || input.isBlank()) return "";
+        if (input.contains(",")) return input.split(",")[1];
+        return input;
+    }
+
+    /**
+     * Resolves image paths/URLs to raw base64 strings.
+     */
     private String fetchOrCleanBase64(String input) {
         if (input == null || input.isBlank()) return "";
 
-        // If it's an HTTP/HTTPS URL, fetch bytes and convert to base64
+        // Relative path like /products/product1.png — read from local public directory
+        if (input.startsWith("/") || input.startsWith("products/")) {
+            try {
+                String relativePath = input.startsWith("/") ? input.substring(1) : input;
+                File file = new File("../drapeai-frontend/public/" + relativePath);
+                if (!file.exists()) file = new File("drapeai-frontend/public/" + relativePath);
+                if (file.exists()) {
+                    log.info("Loading local garment image from disk: {}", file.getAbsolutePath());
+                    byte[] bytes = Files.readAllBytes(file.toPath());
+                    return Base64.getEncoder().encodeToString(bytes);
+                } else {
+                    byte[] bytes = restTemplate.getForObject("http://localhost:5173/" + relativePath, byte[].class);
+                    if (bytes != null && bytes.length > 0) return Base64.getEncoder().encodeToString(bytes);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to load local product image {}: {}", input, e.getMessage());
+            }
+        }
+
+        // HTTP/HTTPS URL — download and convert to base64
         if (input.startsWith("http://") || input.startsWith("https://")) {
             try {
                 log.info("Downloading image from URL to Base64: {}", input);
                 byte[] imageBytes = restTemplate.getForObject(input, byte[].class);
-                if (imageBytes != null && imageBytes.length > 0) {
-                    return Base64.getEncoder().encodeToString(imageBytes);
-                }
+                if (imageBytes != null && imageBytes.length > 0) return Base64.getEncoder().encodeToString(imageBytes);
             } catch (Exception e) {
                 log.warn("Failed to download image from URL {}: {}", input, e.getMessage());
             }
         }
 
-        // If data URL prefix exists, strip it
-        if (input.contains(",")) {
-            return input.split(",")[1];
-        }
+        // Strip data URL prefix
+        if (input.contains(",")) return input.split(",")[1];
 
         return input;
     }
