@@ -1,12 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 
 interface ProductCardProps {
   product: Product;
-  onTryOn?: (product: Product) => void;
   index?: number;
 }
 
@@ -17,7 +15,7 @@ const BACKDROP_STYLES = [
   'bg-[#D9C4A9]/50 -translate-y-6 translate-x-2',
 ];
 
-export default function ProductCard({ product, onTryOn, index = 0 }: ProductCardProps) {
+export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { addToCart } = useCart();
   const backdropClass = BACKDROP_STYLES[index % BACKDROP_STYLES.length];
 
@@ -54,13 +52,6 @@ export default function ProductCard({ product, onTryOn, index = 0 }: ProductCard
             >
               View Details
             </Link>
-            <button
-              onClick={() => onTryOn?.(product)}
-              className="bg-black/80 text-white w-full py-3.5 rounded-xl font-label-caps text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-black cursor-pointer active:scale-95 shadow-lg"
-            >
-              <Sparkles className="w-4 h-4 text-yellow-400 fill-yellow-400 animate-pulse" />
-              Try On with AI
-            </button>
           </div>
         </div>
       </div>

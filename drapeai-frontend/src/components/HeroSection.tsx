@@ -34,7 +34,7 @@ export default function HeroSection() {
           </h2>
 
           <p className="font-sans text-base text-black/75 max-w-md mb-10 leading-relaxed">
-            Browse through our diverse range of meticulously crafted garments, designed to bring out your individuality and cater to your sense of style. Experience virtual try-on with instant AI visualization.
+            Browse through our diverse range of meticulously crafted garments, designed to bring out your individuality and cater to your sense of style.
           </p>
 
           <div className="flex gap-4">
@@ -70,10 +70,10 @@ export default function HeroSection() {
                 <Sparkles className="w-5 h-5 text-[#D9C4A9] animate-pulse" />
               </div>
               <span className="font-label-caps text-[11px] text-white tracking-widest leading-tight font-extrabold">
-                VIRTUAL TRY-ON READY
+                EDITORIAL WARDROBE
               </span>
               <span className="text-[9px] text-white/70 uppercase tracking-wider">
-                Powered by DrapeAI Engine
+                Signature spring edit
               </span>
             </div>
           </div>

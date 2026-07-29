@@ -24,14 +24,12 @@ import AdminPage from './pages/AdminPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
-import TryOnModal from './components/TryOnModal';
 
 function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [selectedTryOnProduct, setSelectedTryOnProduct] = useState<Product | null>(null);
 
   const fetchProducts = async () => {
     try {
@@ -84,7 +82,7 @@ function HomePage() {
                 NEW ARRIVALS
               </h3>
               <p className="text-black/70 font-sans text-sm max-w-lg leading-relaxed">
-                Explore our latest high-street fashion catalog. Click 'Try On with AI' to preview any garment instantly.
+                Explore our latest high-street fashion catalog. Find your favorites and shop the latest wardrobe edits.
               </p>
             </div>
 
@@ -133,7 +131,6 @@ function HomePage() {
                   key={product.id}
                   product={product}
                   index={idx}
-                  onTryOn={(p) => setSelectedTryOnProduct(p)}
                 />
               ))}
             </div>
@@ -144,13 +141,6 @@ function HomePage() {
       {/* 6. Visual Quote Divider */}
       <QuoteSection />
 
-      {/* 7. Try-On Modal */}
-      {selectedTryOnProduct && (
-        <TryOnModal
-          product={selectedTryOnProduct}
-          onClose={() => setSelectedTryOnProduct(null)}
-        />
-      )}
 
       {/* 8. Stitch Footer */}
       <Footer />

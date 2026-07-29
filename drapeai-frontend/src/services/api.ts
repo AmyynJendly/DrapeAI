@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { Product, TryOnRequest, TryOnResponse } from '../types';
+import { Product } from '../types';
 import { AuthResponse, LoginRequest, RegisterRequest, UpdateAccountRequest, UserInfo } from '../types/auth';
 import { CreateOrderRequestPayload, OrderResponsePayload } from '../types/order';
 
@@ -105,17 +105,6 @@ export const productApi = {
   },
   deleteProduct: async (id: string): Promise<void> => {
     await apiClient.delete(`/products/${id}`);
-  },
-};
-
-export const tryOnApi = {
-  processTryOn: async (data: TryOnRequest): Promise<TryOnResponse> => {
-    const response = await apiClient.post<TryOnResponse>('/try-on/process', data);
-    return response.data;
-  },
-  getHistory: async (): Promise<TryOnResponse[]> => {
-    const response = await apiClient.get<TryOnResponse[]>('/try-on/history');
-    return response.data;
   },
 };
 

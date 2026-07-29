@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Loader2, Package, Sparkles, ArrowLeft } from 'lucide-react';
+import { Loader2, Package, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Product } from '../types';
 import { productApi } from '../services/api';
@@ -9,7 +9,6 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import TopBanner from '../components/TopBanner';
 import ProductCard from '../components/ProductCard';
-import TryOnModal from '../components/TryOnModal';
 import { useCart } from '../context/CartContext';
 
 export default function ProductDetailPage() {
@@ -19,7 +18,6 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTryOnProduct, setSelectedTryOnProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -166,13 +164,6 @@ export default function ProductDetailPage() {
                 >
                   Add to cart
                 </button>
-                <button
-                  onClick={() => setSelectedTryOnProduct(product)}
-                  className="inline-flex items-center justify-center gap-2 bg-white text-black px-6 py-4 rounded-full font-bold text-xs uppercase tracking-widest border border-black/10 hover:bg-black hover:text-white transition shadow-lg"
-                >
-                  <Sparkles className="w-4 h-4 text-yellow-500" />
-                  Try on with AI
-                </button>
               </div>
             </motion.div>
           </div>
@@ -189,15 +180,12 @@ export default function ProductDetailPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {relatedProducts.map((item, index) => (
-              <ProductCard key={item.id} product={item} index={index} onTryOn={setSelectedTryOnProduct} />
+              <ProductCard key={item.id} product={item} index={index} />
             ))}
           </div>
         </section>
       </main>
 
-      {selectedTryOnProduct && (
-        <TryOnModal product={selectedTryOnProduct} onClose={() => setSelectedTryOnProduct(null)} />
-      )}
 
       <Footer />
     </div>

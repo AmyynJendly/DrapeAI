@@ -12,21 +12,4 @@ export interface Product {
   careInstructions?: string;
   highlights?: string[];
 }
-
-export interface TryOnRequest {
-  productId: string;
-  userImage: string;
-  category: string;
-}
-
-export interface TryOnResponse {
-  id: string;
-  productId: string;
-  productName: string;
-  category: string;
-  userImageUrl: string;
-  resultImageUrl: string;
-  status: string;
-  message?: string;
-  createdAt?: string;
-}
+// Virtual try-on types removed — feature deprecated for now.
