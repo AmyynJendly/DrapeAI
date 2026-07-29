@@ -24,6 +24,7 @@ public class Product {
     private String category; // "apparel" or "footwear"
     private Double price;
     private String imageUrl;
+    private List<String> images;
     private String fit;
     private String materials;
     private String careInstructions;

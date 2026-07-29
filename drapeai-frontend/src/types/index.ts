@@ -7,6 +7,7 @@ export interface Product {
   category: 'apparel' | 'footwear';
   price: number;
   imageUrl: string;
+  images?: string[];
   fit?: string;
   materials?: string;
   careInstructions?: string;

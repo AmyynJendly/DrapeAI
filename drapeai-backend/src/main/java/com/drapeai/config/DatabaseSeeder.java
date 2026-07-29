@@ -16,170 +16,94 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private final ProductRepository productRepository;
 
-    private static final List<Product> CURATED_PRODUCTS = List.of(
-        // ── APPAREL (garment-only flat lay / hanger images) ──
+    public static final List<Product> CURATED_PRODUCTS = List.of(
         Product.builder()
-            .brand("Zara")
-            .name("Tailored Linen Blend Blazer")
-            .slug("zara-tailored-linen-blend-blazer")
-            .description("A softly structured linen blend blazer with a clean shoulder, refined lapel, and an easy drape for day-to-evening dressing.")
+            .brand("Saint Laurent")
+            .name("Double-Breasted Tuxedo Jacket in Grain de Poudre")
+            .slug("double-breasted-tuxedo-jacket-in-grain-de-poudre")
+            .description("Double-breasted, six-button tuxedo jacket made with certified wool, featuring a satin peaked lapel and satin-covered buttons.")
             .category("apparel")
-            .price(129.00)
-            .imageUrl("https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?auto=format&fit=crop&w=800&q=80")
-            .fit("Relaxed tailored fit")
-            .materials("Linen, viscose, polyester")
-            .careInstructions("Dry clean only; steam lightly to restore shape.")
-            .highlights(List.of("Single-breasted closure", "Fully lined", "Sharp shoulder line"))
+            .price(3590.00)
+            .imageUrl("/products/product1.png")
+            .images(List.of("/products/product1.png", "/products/product1.1.png"))
+            .fit("Tailored fit with padded shoulders")
+            .materials("100% Certified Wool; 100% Silk lining")
+            .careInstructions("Do not wash; Dry clean mild process; Iron at max 110°C without steam.")
+            .highlights(List.of(
+                "Double-breasted, six-button closure",
+                "Satin peaked lapel and satin-covered buttons",
+                "Padded shoulders and single back vent",
+                "Two jetted flap pockets and one chest welt pocket",
+                "Made in Italy"
+            ))
             .build(),
         Product.builder()
-            .brand("COS")
-            .name("Pleated Wide-Leg Trouser")
-            .slug("cos-pleated-wide-leg-trouser")
-            .description("Fluid wide-leg trousers cut with a sharp front crease and generous movement for a polished everyday silhouette.")
+            .brand("Dior")
+            .name("Bar Jacket Black Wool, Silk and Lace")
+            .slug("bar-jacket-black-wool-silk-and-lace")
+            .description("The Bar jacket is reimagined through modern vision and House codes of refinement. Crafted in lightweight black wool and silk, it features a fitted silhouette elevated by tonal lace details at the hem and collar.")
             .category("apparel")
-            .price(110.00)
-            .imageUrl("https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=800&q=80")
-            .fit("High rise, relaxed leg")
-            .materials("Recycled polyester, wool blend")
-            .careInstructions("Machine wash cold inside out; hang dry.")
-            .highlights(List.of("Pressed front crease", "Side pockets", "Invisible waistband closure"))
+            .price(5300.00)
+            .imageUrl("/products/product2.png")
+            .images(List.of("/products/product2.png", "/products/product2.1.png", "/products/product2.2.png"))
+            .fit("Fitted silhouette")
+            .materials("77% Wool, 23% Silk; Lining: 100% Silk; Tonal lace details")
+            .careInstructions("Treat with extra care and gently dry clean.")
+            .highlights(List.of(
+                "Front button closure with tonal CD horn buttons",
+                "Tonal lace details at the hem and collar",
+                "Buttoned cuffs and front flap pockets",
+                "Full tonal silk lining",
+                "Made in France"
+            ))
             .build(),
         Product.builder()
-            .brand("Mango")
-            .name("Soft Knit Polo Sweater")
-            .slug("mango-soft-knit-polo-sweater")
-            .description("A lightweight knit polo with a clean collar and compact rib trim, designed for layering through transitional weather.")
+            .brand("Dolce & Gabbana")
+            .name("Majolica-Print Silk Dress")
+            .slug("majolica-print-silk-dress")
+            .description("Crafted from luxurious silk, this dress features Dolce & Gabbana's signature Mediterranean Majolica tile print. Designed with a fluid, feminine silhouette that celebrates traditional Italian ceramic art and craftsmanship.")
             .category("apparel")
-            .price(79.00)
-            .imageUrl("https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=800&q=80")
-            .fit("Regular fit")
-            .materials("Cotton, modal")
-            .careInstructions("Machine wash delicate; reshape while damp.")
-            .highlights(List.of("Open polo collar", "Ribbed cuffs", "Breathable knit texture"))
+            .price(4195.00)
+            .imageUrl("/products/product3.png")
+            .images(List.of("/products/product3.png"))
+            .fit("Flowing silhouetted fit")
+            .materials("100% Pure Silk")
+            .careInstructions("Dry clean only; iron at low temperature; do not bleach.")
+            .highlights(List.of(
+                "Iconic Mediterranean Majolica tile print motif",
+                "Pure silk fabric with elegant drape",
+                "Concealed rear zip closure",
+                "Fully lined",
+                "Made in Italy"
+            ))
             .build(),
         Product.builder()
-            .brand("Massimo Dutti")
-            .name("Leather Minimal Chelsea Boot")
-            .slug("massimo-dutti-leather-minimal-chelsea-boot")
-            .description("Sleek Chelsea boots in smooth leather with a refined square toe and low stacked heel for a modern tailored finish.")
-            .category("footwear")
-            .price(189.00)
-            .imageUrl("https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&w=800&q=80")
-            .fit("True to size")
-            .materials("Leather upper, rubber sole")
-            .careInstructions("Wipe clean with a soft cloth; condition regularly.")
-            .highlights(List.of("Elastic side panels", "Pull tab", "Durable grip sole"))
-            .build(),
-        Product.builder()
-            .brand("Aritzia")
-            .name("Structured Tank Bodysuit")
-            .slug("aritzia-structured-tank-bodysuit")
-            .description("A smooth, body-skimming tank bodysuit with a square neckline and clean finish that layers seamlessly under tailoring.")
+            .brand("Dolce & Gabbana")
+            .name("Long Lace Dress in Black")
+            .slug("long-lace-dress-black")
+            .description("A long sheer lace dress conveying Sicilian traditions with a contemporary edge. Crafted from stretch lace and tulle in iconic black, it offers a fitted silhouette that caresses the body like a second skin.")
             .category("apparel")
-            .price(58.00)
-            .imageUrl("https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80")
-            .fit("Slim fit")
-            .materials("Modal, elastane")
-            .careInstructions("Machine wash cold; line dry.")
-            .highlights(List.of("Snap closure", "Double-layer front", "Smooth stretch finish"))
-            .build(),
-        Product.builder()
-            .brand("AllSaints")
-            .name("Oversized Graphic Hoodie")
-            .slug("allsaints-oversized-graphic-hoodie")
-            .description("An oversized fleece hoodie with a washed graphic print and a substantial hand feel for a laid-back streetwear look.")
-            .category("apparel")
-            .price(98.00)
-            .imageUrl("https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=80")
-            .fit("Oversized fit")
-            .materials("Cotton fleece")
-            .careInstructions("Machine wash cold with like colors; tumble dry low.")
-            .highlights(List.of("Kangaroo pocket", "Dropped shoulders", "Soft brushed interior"))
-            .build(),
-        Product.builder()
-            .brand("Adidas")
-            .name("Retro Court Sneaker")
-            .slug("adidas-retro-court-sneaker")
-            .description("A low-profile court sneaker with vintage-inspired lines, cushioned footbed, and clean panel detailing for everyday wear.")
-            .category("footwear")
-            .price(105.00)
-            .imageUrl("https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&w=800&q=80")
-            .fit("True to size")
-            .materials("Leather upper, textile lining, rubber outsole")
-            .careInstructions("Spot clean only.")
-            .highlights(List.of("Padded collar", "Rubber cupsole", "Classic lace-up closure"))
-            .build(),
-        Product.builder()
-            .brand("Mango")
-            .name("Poplin Button Shirt")
-            .slug("mango-poplin-button-shirt")
-            .description("A crisp poplin shirt with a relaxed silhouette, sharp collar, and versatile proportions suited to both office and off-duty styling.")
-            .category("apparel")
-            .price(69.00)
-            .imageUrl("https://images.unsplash.com/photo-1598033129183-c4f50c736e10?auto=format&fit=crop&w=800&q=80")
-            .fit("Relaxed fit")
-            .materials("Organic cotton poplin")
-            .careInstructions("Machine wash warm; iron while slightly damp.")
-            .highlights(List.of("Curved hem", "Chest pocket", "Button cuff detail"))
-            .build(),
-        Product.builder()
-            .brand("COS")
-            .name("Boxy Wool Coat")
-            .slug("cos-boxy-wool-coat")
-            .description("A boxy wool coat with a minimal front and cocooning volume, designed to layer over knitwear and tailoring alike.")
-            .category("apparel")
-            .price(249.00)
-            .imageUrl("https://images.unsplash.com/photo-1544022613-e87ca75a784a?auto=format&fit=crop&w=800&q=80")
-            .fit("Relaxed oversized fit")
-            .materials("Wool, polyester lining")
-            .careInstructions("Dry clean only.")
-            .highlights(List.of("Hidden button placket", "Deep patch pockets", "Dropped shoulder"))
-            .build(),
-        Product.builder()
-            .brand("Zara")
-            .name("Slim Leather Loafer")
-            .slug("zara-slim-leather-loafer")
-            .description("A refined slim loafer in polished leather with a lightweight profile that sharpens tailored and casual looks.")
-            .category("footwear")
-            .price(139.00)
-            .imageUrl("https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80")
-            .fit("Runs slightly narrow")
-            .materials("Leather upper, leather lining, synthetic sole")
-            .careInstructions("Clean and polish regularly; store with shoe trees.")
-            .highlights(List.of("Soft square toe", "Low stacked heel", "Slip-on construction"))
+            .price(2645.00)
+            .imageUrl("/products/product4.jpg")
+            .images(List.of("/products/product4.jpg"))
+            .fit("Fitted second-skin silhouette")
+            .materials("82% Polyamide, 18% Spandex (Stretch Lace & Tulle)")
+            .careInstructions("Dry clean only; do not bleach; iron at low temperature.")
+            .highlights(List.of(
+                "Sheer stretch-lace overlay",
+                "Round neck and long sleeves",
+                "Includes removable slip dress",
+                "Sicilian-inspired capsule design",
+                "Made in Italy"
+            ))
             .build()
     );
 
     @Override
     public void run(String... args) {
-        if (shouldRefreshCatalog()) {
-            log.info("Refreshing product catalog with curated storefront items...");
-            productRepository.deleteAll();
-            productRepository.saveAll(CURATED_PRODUCTS);
-            log.info("Successfully seeded {} products into MongoDB.", CURATED_PRODUCTS.size());
-        } else {
-            // Update any existing unoptimized Unsplash URLs in database
-            List<Product> existingProducts = productRepository.findAll();
-            boolean updated = false;
-            for (Product p : existingProducts) {
-                if (p.getImageUrl() != null && p.getImageUrl().contains("images.unsplash.com") && !p.getImageUrl().contains("?")) {
-                    p.setImageUrl(p.getImageUrl() + "?auto=format&fit=crop&w=600&q=80");
-                    updated = true;
-                }
-            }
-            if (updated) {
-                productRepository.saveAll(existingProducts);
-                log.info("Updated existing products with optimized image URLs.");
-            }
-        }
-    }
-
-    private boolean shouldRefreshCatalog() {
-        if (productRepository.count() == 0) {
-            return true;
-        }
-
-        return productRepository.findAll().stream()
-                .noneMatch(product -> product.getBrand() != null && !product.getBrand().isBlank());
+        log.info("Refreshing database catalog with luxury product collection...");
+        productRepository.deleteAll();
+        productRepository.saveAll(CURATED_PRODUCTS);
+        log.info("Successfully updated MongoDB with {} luxury products and local photo assets.", CURATED_PRODUCTS.size());
     }
 }

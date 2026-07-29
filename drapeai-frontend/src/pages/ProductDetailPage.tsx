@@ -18,6 +18,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -52,6 +53,16 @@ export default function ProductDetailPage() {
       .filter((item) => item.id !== product.id && item.category === product.category)
       .slice(0, 4);
   }, [product]);
+
+  const galleryImages = useMemo(() => {
+    if (!product) return [];
+    if (product.images && product.images.length > 0) {
+      return product.images;
+    }
+    return [product.imageUrl];
+  }, [product]);
+
+  const currentImage = selectedImage || product?.imageUrl || galleryImages[0];
 
   if (loading) {
     return (
@@ -92,7 +103,7 @@ export default function ProductDetailPage() {
         <section className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-10 lg:py-16">
           <button
             onClick={() => navigate('/#catalog')}
-            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-black/55 hover:text-black transition mb-8"
+            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-black/55 hover:text-black transition mb-8 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to catalog
@@ -102,9 +113,27 @@ export default function ProductDetailPage() {
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-[32px] overflow-hidden bg-white/60 border border-black/5 shadow-xl"
+              className="space-y-4"
             >
-              <img src={product.imageUrl} alt={product.name} className="w-full h-[640px] object-cover" />
+              <div className="rounded-[32px] overflow-hidden bg-white/60 border border-black/5 shadow-xl">
+                <img src={currentImage} alt={product.name} className="w-full h-[640px] object-cover" />
+              </div>
+
+              {galleryImages.length > 1 && (
+                <div className="flex items-center gap-3 overflow-x-auto pb-2">
+                  {galleryImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImage(img)}
+                      className={`relative w-20 h-24 rounded-2xl overflow-hidden border-2 transition cursor-pointer flex-shrink-0 ${
+                        currentImage === img ? 'border-black ring-2 ring-black/10' : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={img} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </motion.div>
 
             <motion.div
@@ -160,7 +189,7 @@ export default function ProductDetailPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => addToCart(product, 1)}
-                  className="bg-black text-white px-6 py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-black/90 transition shadow-lg"
+                  className="bg-black text-white px-6 py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-black/90 transition shadow-lg cursor-pointer"
                 >
                   Add to cart
                 </button>
@@ -185,7 +214,6 @@ export default function ProductDetailPage() {
           </div>
         </section>
       </main>
-
 
       <Footer />
     </div>
