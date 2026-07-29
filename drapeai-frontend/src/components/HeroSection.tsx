@@ -64,7 +64,7 @@ export default function HeroSection() {
               className="w-full h-full object-cover grayscale opacity-90 transition-transform duration-700 hover:scale-105"
             />
 
-            {/* AI Try-on Badge */}
+            
             <div className="absolute bottom-8 right-8 bg-black/40 backdrop-blur-2xl border border-white/20 p-5 rounded-2xl flex flex-col items-center gap-2 max-w-[210px] text-center shadow-2xl">
               <div className="w-10 h-10 bg-[#5A4533] rounded-xl flex items-center justify-center mb-1">
                 <Sparkles className="w-5 h-5 text-[#D9C4A9] animate-pulse" />

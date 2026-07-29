@@ -12,4 +12,3 @@ export interface Product {
   careInstructions?: string;
   highlights?: string[];
 }
-// Virtual try-on types removed — feature deprecated for now.
